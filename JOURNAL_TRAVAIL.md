@@ -1087,3 +1087,55 @@ termine et propre) :
    francais/tunisien, ablations "sans grading"/"sans groundedness" non
    faites, bug Mesure/Programme non corrige a la racine, `app_streamlit.py`
    non reteste en conditions reelles.
+
+## Mise en ordre du projet (2026-10-11, sur demande explicite)
+
+Suite a la question "comment rendre le projet solide et bien structure",
+etapes convenues avec l'utilisatrice par ordre de priorite : (1) versioning
+git, (2) hygiene des secrets, (3) nettoyage/archivage, (4) requirements.txt,
+(5) README, (6) config centralisee, (7) smoke test, (8) dette ablation deja
+notee plus haut. Validation recue pour commencer par 1-3.
+
+**Verifie avant tout nettoyage** : aucune des 4 clefs Groq utilisees
+aujourd'hui n'apparait en clair ailleurs que dans `.env` (grep `gsk_` sur
+tout le projet) -- mais elles ont circule en clair dans la conversation,
+donc **a faire par l'utilisatrice** : les revoquer/regenerer sur
+console.groq.com une fois cette session terminee (hygiene standard, pas
+bloquant pour la suite).
+
+**Git init** + `.gitignore` cree (`.env`, `__pycache__/`, `archive/`,
+`evaluation/resultats_partial.json` -- checkpoint transitoire, pas un
+resultat final -- et les logs `log*.txt`).
+
+**Nettoyage/archivage** (deplace dans `archive/`, rien supprime) :
+- `archive/backups_graphe/` : les 4 dossiers `backup_20261007`,
+  `backup_20261008`, `backup_wipe_20261008_211609`,
+  `backup_wipe_20261008_215535` (sauvegardes du graphe, aucun script ne les
+  reference par leur nom exact -- verifie par grep avant deplacement).
+- `archive/logs_root/` : `log.txt` (7.4 Mo), `log_build_20261008.txt`,
+  les 10 `log_retraitement_*.txt`, `debug_log.txt`.
+- `archive/debug/` : `debug_images/`, `debug_images_converted/` (artefacts
+  WMF/PNG de debug de `1_extract_pptx.py`, non references dans le code),
+  `document/` (dossier vide), `extrait.txt` (fichier vide).
+- `archive/evaluation_logs/` : tous les `evaluation/log_*.txt` (logs
+  d'incidents/debug des runs d'evaluation/ablation).
+- `archive/evaluation_partials/` : les `resultats_partial_backup_*.json`
+  crees pendant cette session, `resultats_partial_postfix_8q.json`,
+  `resultats_partial_prefix_20261009.json`, `out_q.txt`.
+
+**Garde a la racine/evaluation/** (fichiers actifs, pas de debris) :
+tous les scripts `.py`, `sources.csv` et `documents/` (references par le
+code), `textes/` (corpus), `assets/` (icones Streamlit), les resultats
+officiels dates (`resultats_2026100{8,9,11}.*`), `resultats_ablation*`,
+`resultats_baseline_20261009.json`, `rapport_evaluation.md`,
+`gold_eval_set.json`, `poster_tabac.tex`, `graphe_neo4j.png`,
+`resultats_comparaison.png`.
+
+**Premier commit fait** (`3dcf162`, 52 fichiers, "Initial commit: chatbot
+GraphRAG tabac Tunisie (etat au 2026-10-11)") -- capture l'etat actuel du
+code/donnees utiles, sans l'historique d'incidents (qui reste accessible
+sur disque dans `archive/`, juste non versionne).
+
+**Suite prevue** (sur confirmation de l'utilisatrice) : requirements.txt,
+README (architecture + comment relancer chaque etape), puis centralisation
+de la config et smoke test.
