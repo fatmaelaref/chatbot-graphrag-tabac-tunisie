@@ -1353,6 +1353,62 @@ confusion PNRT/sujet-proche non entierement resolu -- pas de nouvelle
 regle speciale ajoutee pour ce cas isole (risque de fragiliser le routage
 general pour un seul point de donnees).
 
+### Q57 (substances chimiques/cancerigenes) -- diagnostic approfondi, pas corrige
+
+Reexamine en detail sur demande explicite de l'utilisatrice ("je veux un
+travail solide").
+
+**Cause exacte identifiee** (requete vectorielle brute directe, meme
+methode que pour le bug demi-vie nicotine) : le bon chunk ("Plus de 7000
+substances chimiques... au moins 69 cancerigenes", CHATBOT 2 diapositive
+4) est classe **19e** sur une recherche a 30 candidats -- loin au-dela de
+`TOP_K_VECTOR=8`. Le chunk classe 1er (SantePubliqueFrance, "COMPOSITION
+DE LA FUMEE DE TABAC") est topiquement tres proche mais contient une
+statistique DIFFERENTE (4000/50 au lieu de 7000/69) -- pas un probleme de
+dilution d'embedding par du bruit OCR comme d'autres cas deja vus, mais
+deux sources reellement concurrentes sur le meme sujet avec des chiffres
+differents, et seule la moins precise est dans le top 8 habituel.
+
+**Verifie aussi cote graphe** : les entites liees au bon chunk sont
+labellisees `Statistique` ("7000", "69"), PAS `Substance` -- la route
+`INTENT_PRIORITY` existante pour "substance chimique"/"cancerigene"
+(ajoutee le 2026-10-07) cherche le label `Substance`, donc ne trouve rien
+pour ce chunk precis malgre le bon declenchement de l'intention.
+
+**Tentative de correctif testee ET ABANDONNEE (decouverte importante en
+chemin)** : augmenter `TOP_K_VECTOR` a 20 pour ce test isole (sans toucher
+au code global) a declenche une erreur Groq **413 "Request too large...
+tokens per minute (TPM) : Limit 8000"** -- une LIMITE DIFFERENTE de celle
+combattue toute la journee (TPD, quota journalier). C'est un plafond PAR
+MINUTE sur le tier gratuit, qui peut etre depasse par UN SEUL appel de
+grading si trop de candidats (chacun tronque a 1500 caracteres, donc
+~375 tokens) sont envoyes d'un coup. **Augmenter `TOP_K_VECTOR` ou
+`MAX_GRAPH_CANDIDATES` globalement n'est donc PAS un changement sans
+risque** -- ca peut degrader le grading sur BEAUCOUP de questions (pas
+seulement celle visee) en declenchant ce plafond TPM plus souvent. Cette
+decouverte explique peut-etre aussi une partie des "Grading LLM
+indisponible" deja observes toute la journee, qui n'etaient pas tous
+necessairement dus au seul quota TPD.
+
+**Decision** : ne pas corriger Q57 dans cette session. Un vrai correctif
+demanderait une route Cypher ciblee (label `Statistique`, filtree par
+exemple sur un chunk partageant une entite `Pathologie` nommee
+"cancerigene", PAS un dump de tous les 79 noeuds `Statistique` du graphe
+qui rouvrirait le meme risque TPM) -- un vrai morceau d'ingenierie, pas un
+ajustement de 5 minutes, et pas justifie pour corriger un seul cas de
+test sans re-evaluation complete pour verifier l'absence de regression.
+**Limite a assumer telle quelle** : Q57 reste un exemple reel et bien
+compris de reponse donnee avec confiance mais avec des chiffres faux --
+a mentionner honnetement si questionne sur la fiabilite du systeme.
+
+**Nouvelle connaissance operationnelle a retenir pour la suite** : deux
+limites Groq distinctes a surveiller separement desormais -- TPD (tokens
+par jour, 200000, celle qui a cause la plupart des incidents de cette
+session) ET TPM (tokens par minute, 8000, qui peut etre declenchee meme
+avec un quota journalier intact si un seul appel envoie trop de
+candidats a la fois). Toute augmentation future de `TOP_K_VECTOR`/
+`MAX_GRAPH_CANDIDATES` devra etre testee avec cette limite TPM en tete.
+
 ### Bug extraction Mesure/Programme (PNRT) -- renforce a la racine, pas revalide
 
 `kg_config.py` (EXEMPLE 10) contenait deja un exemple nomme explicite
