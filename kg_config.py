@@ -540,6 +540,11 @@ Extraction attendue :
 A NE PAS FAIRE : ne cree PAS 4 noeuds separes pour "Legislation Tunisienne", "Aide au
 sevrage tabagique", etc. -- ce sont les axes/themes d'une presentation, pas des entites
 du monde reel. Garde-les en propriete texte du noeud Programme si besoin, pas en noeuds.
+A NE PAS FAIRE NON PLUS (erreur deja constatee en pratique malgre cet exemple) : ne
+classe JAMAIS "Programme national de lutte anti-tabac (2001)" comme type Mesure -- un
+programme nomme et date reste TOUJOURS de type Programme, meme s'il decrit aussi des
+actions. Le type Mesure est reserve au CONTENU d'une action isolee (voir sa description
+plus haut), jamais a un programme pluriannuel nomme comme celui-ci.
 
 --- EXEMPLE 11 : outil clinique (meme regle de sobriete) ---
 Texte source :

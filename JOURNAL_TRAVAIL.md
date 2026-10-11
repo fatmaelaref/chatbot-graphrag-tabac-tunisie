@@ -1289,3 +1289,95 @@ correctness_score is None` avec `n_evidence_retained > 0` ET
 
 `rapport_evaluation.md`, `resultats_20261011.json/csv`,
 `scores_par_categorie.png` regeneres avec ces chiffres finaux.
+
+### Lacunes de retrieval -- reinvestigation avec donnees fraiches
+
+Les 8 questions historiquement flaguees "lacune de retrieval"
+(`hit_hybrid=False`) reexaminees une par une (`sources`, `final_answer`,
+`correctness_score` reels, pas juste le flag) :
+
+- **Q05, Q06, Q10, Q48, Q49** : **PAS de vraie lacune** -- le chatbot
+  repond correctement (correctness 4-5/5) en citant la bonne source, le
+  flag `hit_hybrid=False` vient juste du fait que `expected_snippet`
+  (choisi a la main dans `gold_eval_set.json`) ne correspond pas au chunk
+  exact que la pipeline utilise reellement (parfois le MEME fait existe
+  dans 2 fichiers sources avec une formulation differente -- ex. Q06 :
+  OCR de CHATBOT 1 vs tableau markdown de CHATBOT 2, meme chiffre "2
+  milliards de TND"). Confirme la limite deja ecrite dans le rapport
+  ("un hit-rate bas peut signaler un snippet mal choisi autant qu'un vrai
+  echec de retrieval") -- **pas une regression a corriger**, un biais
+  connu de la methode d'evaluation.
+- **Q19** : vraie lacune partielle -- correctness=2, le chatbot repond
+  mais omet plusieurs details attendus (bilinguisme des avertissements,
+  validation ministere de la sante, revision annuelle) probablement
+  disperses dans d'autres chunks jamais remontes.
+- **Q47** : vraie lacune totale -- 0 preuve retenue meme apres
+  reformulation, le fait (reduction de cafeine de 50% a l'arret du tabac)
+  n'est jamais retrouve par le canal vecteur. Abstention correcte dans ce
+  cas (comportement prudent, mais rappel manque).
+- **Q57** : **cas le plus preoccupant** -- le chatbot repond avec
+  confiance mais avec des CHIFFRES FAUX ("4000 substances, 50
+  cancerigenes" source SantePubliqueFrance) alors que le corpus contient
+  la bonne reponse ailleurs ("plus de 7000 substances, au moins 69
+  cancerigenes", CHATBOT 2 diapositive 4, US Surgeon General 2010) --
+  verifie que ce chunk existe bien dans `textes/` mais n'est jamais
+  remonte par le vecteur (probablement dilue par un gros bloc OCR de noms
+  de substances en anglais juste apres dans le meme chunk). Contrairement
+  aux autres cas, ici ce n'est pas une abstention trop prudente mais une
+  **reponse fausse donnee avec assurance** -- le type d'erreur le plus
+  grave pour un chatbot medical. Pas corrige dans cette session (aurait
+  besoin d'un re-chunking cible ou d'un filtre par nom type Statistique,
+  pas justifie pour un seul cas isole sans risquer de fragiliser le
+  routage avec trop de regles speciales).
+
+### Bug de detection d'auto-abstention corrige (`_NO_INFO_PATTERNS`)
+
+En reexaminant Q77 (piege PNRT/loi voiture), trouve que le regex partage
+entre le pipeline et l'evaluation ne reconnaissait que "preuves
+disponibles/fournies ne..." -- une reponse disant "les **informations**
+fournies ne..." (formulation que le LLM utilise parfois a la place de
+"preuves") n'etait pas detectee, avec 2 consequences : mauvaise
+classification cote evaluation (comportement="repondre" au lieu
+d'"abstention" alors que le texte EST une auto-abstention), et le
+garde-fou `_is_self_declared_no_info` (qui evite au critique de
+groundedness de reprocher a tort une "affirmation non supportee" sur un
+simple constat d'absence) ne s'appliquait pas non plus. **Corrige** :
+regex elargi a `(preuves?|informations?|elements?) (disponibles?|
+fournies?) ne`. Verifie isolement (match confirme sur la phrase exacte de
+Q77). Rejoue Q77 pour verifier en conditions reelles : **cette fois le
+LLM a produit une reponse differente** (a trouve un chunk NHS tangentiel
+et a repondu au lieu de s'abstenir) -- non-determinisme habituel du
+pipeline sur une question limite (1/19 preuves retenues). Le correctif de
+regex est valide et utile pour l'avenir, mais Q77 reste un cas limite de
+confusion PNRT/sujet-proche non entierement resolu -- pas de nouvelle
+regle speciale ajoutee pour ce cas isole (risque de fragiliser le routage
+general pour un seul point de donnees).
+
+### Bug extraction Mesure/Programme (PNRT) -- renforce a la racine, pas revalide
+
+`kg_config.py` (EXEMPLE 10) contenait deja un exemple nomme explicite
+pour "Programme national de lutte anti-tabac (2001)" classe Programme,
+mais qwen2.5:7b continuait a le classer Mesure en pratique (deja constate
+et corrige a la main sur le graphe vivant le 2026-10-08). Diagnostic :
+l'exemple existant insiste sur une regle differente (ne pas eclater les
+axes de presentation en noeuds), pas sur la distinction Programme/Mesure
+elle-meme. **Ajoute** une ligne "A NE PAS FAIRE NON PLUS" dediee
+explicitement a cette confusion de label, juste apres l'exemple, dans le
+meme style que les regles Loi/Mesure deja etablies plus haut dans le
+prompt (qui elles fonctionnent). **Pas revalide par un run d'extraction
+reel** (prendrait un retraitement Ollama local d'au moins 1 fichier sur
+le graphe vivant -- juge pas justifie pour un correctif cosmetique/
+preventif face a l'historique d'incidents RAM sur ce genre d'operation).
+A verifier au prochain rebuild ou retraitement reel.
+
+### `app_streamlit.py` -- retest partiel
+
+Lance en arriere-plan (`streamlit run --server.headless true`), reponse
+HTTP 200 confirmee, aucune erreur d'import malgre tous les changements de
+code de cette session (constantes de troncature, regex `_NO_INFO_
+PATTERNS`) -- l'app reutilise directement `3_chatbot_ULTIME.py`, donc ce
+test confirme au moins qu'il n'y a pas de regression d'import/demarrage.
+**Limite honnete** : pas de navigateur automatise disponible dans cette
+session, donc le flux interactif reel (poser une question, voir la
+reponse s'afficher) n'a pas ete teste visuellement -- seulement le
+demarrage du serveur.
