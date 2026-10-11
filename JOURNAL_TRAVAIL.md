@@ -1139,3 +1139,27 @@ sur disque dans `archive/`, juste non versionne).
 **Suite prevue** (sur confirmation de l'utilisatrice) : requirements.txt,
 README (architecture + comment relancer chaque etape), puis centralisation
 de la config et smoke test.
+
+**Etapes 4-5 faites** (sur "fais ce que tu penses correcte") :
+- `requirements.txt` : versions figees extraites de l'environnement actuel
+  via `importlib.metadata` (pas inventees) -- python-dotenv, neo4j,
+  neo4j-graphrag, langgraph(+checkpoint), openai, ollama, streamlit,
+  matplotlib, pdfplumber, python-pptx, pytesseract, Pillow, PyMuPDF. Note
+  explicite qu'Ollama lui-meme (le serveur, pas le client python) n'est pas
+  un paquet pip.
+- `README.md` : architecture (schema texte du pipeline), prerequis,
+  installation, utilisation pas a pas (extraction -> build -> chatbot/
+  interface), evaluation (commandes + note sur la reprise automatique et le
+  mur de quota Groq a surveiller), tableau des resultats cles (run du
+  11/10), limites connues (reprises de ce journal), structure du depot.
+- 2 commits supplementaires (`8b84d7c` pour requirements+README, `b7ef2fa`
+  pour la doc de mise en ordre). 3 commits au total a ce stade.
+
+**Pas fait dans cette session** (etapes 6-8, plus risquees car elles
+touchent le code du pipeline qui fonctionne actuellement) : centralisation
+des constantes dispersees (`TOP_K_VECTOR`/`MAX_GRAPH_CANDIDATES`/noms de
+modeles entre `.env`, `kg_config.py`, `3_chatbot_ULTIME.py`), smoke test,
+integration durable de la section ablation dans le generateur de rapport.
+A reprendre sur demande explicite -- pas de raison de se presser, le projet
+est maintenant versionne et documente, donc le risque de perte/confusion
+est deja tres reduit.
