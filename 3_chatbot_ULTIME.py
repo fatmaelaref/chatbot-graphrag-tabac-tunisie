@@ -147,6 +147,19 @@ MAX_EVIDENCE_TO_LLM = 4         # plafond de preuves envoyees au LLM de generati
                                  # (protection anti-"context dump" -- le LLM ne doit
                                  # pas voir toutes les reponses recuperees)
 
+# Troncature des chunks montres aux LLM (caracteres). Avant le 2026-10-09, ces
+# 3 valeurs etaient codees en dur a chaque site d'appel -- un vrai bug de justesse
+# (pas seulement de style) est ne de cette duplication : GRADING_TRUNCATE_CHARS
+# valait 700 partout, ce qui rendait invisible au LLM de grading un fait situe
+# a la position 1407/1776 caracteres d'un chunk, cause d'une partie des
+# abstentions injustifiees (Q42, Q61, Q65 -- voir JOURNAL_TRAVAIL.md). Releve a
+# 1500 (couvre la quasi-totalite des chunks observes). Les 2 autres sites
+# (generation, verification groundedness) ne portent que sur au plus
+# MAX_EVIDENCE_TO_LLM preuves deja filtrees -- cout marginal, laisses a 2000.
+GRADING_TRUNCATE_CHARS = 1500
+GENERATION_TRUNCATE_CHARS = 2000
+GROUNDEDNESS_TRUNCATE_CHARS = 2000
+
 driver = GraphDatabase.driver(
     os.getenv("NEO4J_URI"),
     auth=(os.getenv("NEO4J_USERNAME"), os.getenv("NEO4J_PASSWORD"))
@@ -847,18 +860,11 @@ def grade_evidence(state: ChatState) -> ChatState:
     # CORRECTIF (09/10/2026) : 700 etait trop court -- diagnostique sur Q61
     # ("effet combine tabac/radon") : le fait recherche etait bien dans le
     # chunk retrouve (SantePubliqueFrance_Consequences.txt) mais a la
-    # position 1407/1776 caracteres, donc invisible au LLM de grading qui
-    # ne voyait que les 700 premiers -- jugement "non pertinent" a tort,
-    # cause probable d'une partie des abstentions injustifiees (Q42, Q65,
-    # Q61...). Releve a 1500 (couvre la quasi-totalite des chunks observes,
-    # HybridSplitter/FixedSizeSplitter produisant rarement plus de ~1800
-    # caracteres) -- cout : augmente la consommation de tokens du
-    # CONTROL_MODEL (deja le point de tension du quota Groq ce jour), mais
-    # corrige un vrai defaut de justesse du chatbot, pas seulement de
-    # l'evaluation.
+    # position 1407/1776 caracteres -- voir GRADING_TRUNCATE_CHARS plus haut
+    # dans le fichier pour le detail de ce bug et son historique.
     numbered = []
     for i, c in enumerate(all_candidates):
-        snippet = clean_chunk(c["text"])[:1500]
+        snippet = clean_chunk(c["text"])[:GRADING_TRUNCATE_CHARS]
         numbered.append(f"[{i}] ({c['origin']}, source: {c['source']}) {snippet}")
 
     user_prompt = f"Question : {query}\n\nPassages :\n" + "\n\n".join(numbered)
@@ -1063,7 +1069,7 @@ chiffre precis, dis-le moi et je peux verifier si une autre preuve du corpus le 
 def generate_answer(state: ChatState) -> ChatState:
     evidence = state.get("graded_evidence", [])
     evidence_text = "\n\n".join(
-        f"- ({e['origin']}, source: {e['source']})\n{clean_chunk(e['text'])[:2000]}"
+        f"- ({e['origin']}, source: {e['source']})\n{clean_chunk(e['text'])[:GENERATION_TRUNCATE_CHARS]}"
         for e in evidence
     )
     user_prompt = f"Preuves disponibles :\n{evidence_text}\n\nQuestion : {state['search_query']}"
@@ -1164,7 +1170,7 @@ def validate_groundedness(state: ChatState) -> ChatState:
     donc toujours pas de boucle infinie.
     """
     evidence = state.get("graded_evidence", [])
-    evidence_text = "\n\n".join(clean_chunk(e["text"])[:2000] for e in evidence)
+    evidence_text = "\n\n".join(clean_chunk(e["text"])[:GROUNDEDNESS_TRUNCATE_CHARS] for e in evidence)
     draft = state["draft_answer"]
     fixes_used = 0
 

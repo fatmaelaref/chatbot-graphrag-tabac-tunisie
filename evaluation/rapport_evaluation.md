@@ -62,19 +62,23 @@
 
 ## Ablation du canal graphe (Cypher)
 
-Comparaison sur les 81 questions entre trois configurations : **A** = RAG simple (recherche vectorielle seule, 1 appel LLM), **B** = pipeline complet avec `USE_GRAPH=0` (sans le canal graphe), **C** = pipeline complet par défaut (avec le canal graphe). B et C utilisent toutes les deux le code actuel (post-correctif de troncature du grading) pour rester comparables ; seule A réutilise un run antérieur (non concerné par ce correctif).
+Comparaison sur le jeu de test complet entre trois configurations : **A** = RAG simple (recherche vectorielle seule, 1 appel LLM), **B** = pipeline complet avec `USE_GRAPH=0` (sans le canal graphe), **C** = pipeline complet par défaut (avec le canal graphe).
 
 | Métrique | A (RAG simple) | B (sans graphe) | C (avec graphe) |
 |---|---|---|---|
-| Précision routage | - | 0.938 | **1.0** |
+| Précision routage | - | 0.938 | 1.0 |
 | Rappel éléments | 0.573 | 0.542 | 0.569 |
 | Justesse (/5) | 4.123 | 4.292 | 4.338 |
 | Latence moy. (s) | 1.624 | 35.051 | 34.607 |
-| Taux abstention | 0.247 | 0.222 | **0.136** |
+| Taux abstention | 0.247 | 0.222 | 0.136 |
 
-Par catégorie (B -> C) : **législation** rappel +0.054 / justesse +0.250 (le canal graphe aide nettement, conforme à l'hypothèse de départ) ; **santé** rappel +0.042 / justesse -0.125 ; **sevrage** rappel +0.024 / justesse +0.059 ; **dépendance** rappel +0.000 / justesse +0.286 ; **épidémiologie** rappel +0.000 / justesse -0.077 (le graphe n'apporte rien sur le rappel ici) ; **sécurité** non mesurable (pas de correctness/rappel pour les questions pièges/refus, normal).
+Par catégorie (B -> C, apport du canal graphe) :
 
-**Lecture globale honnête** : le gain de rappel brut du graphe est modeste sur l'ensemble (+0.027), concentré sur législation/santé/sevrage et absent sur dépendance/épidémiologie -- cohérent avec l'hypothèse que le canal Cypher aide surtout là où le graphe contient des entités structurées (Loi/Mesure/Programme/Statistique). Le gain le plus net et le plus fiable est ailleurs : **précision du routage (0.938 -> 1.0)** et surtout **taux d'abstention nettement plus bas (0.222 -> 0.136)** -- le canal graphe fournit des preuves structurées que le grading retient plus facilement, réduisant les abstentions injustifiées. L'apport du GraphRAG n'est donc pas "rappel/hit-rate brut partout", mais fiabilité du comportement (moins d'abstentions, routage parfait) et gain ciblé sur les catégories structurées.
+- **dependance** : rappel +0.000 / justesse +0.286
+- **epidemiologie** : rappel +0.000 / justesse -0.077
+- **legislation** : rappel +0.054 / justesse +0.250
+- **sante** : rappel +0.042 / justesse -0.125
+- **sevrage** : rappel +0.024 / justesse +0.059
 
 ## Échecs à regarder en priorité
 

@@ -143,7 +143,9 @@ def semantic_similarity(text_a: str, text_b: str):
 def judge_faithfulness(final_answer: str, evidence_items: list) -> dict:
     if not evidence_items:
         return {"score": None, "unsupported_claims": []}
-    evidence_text = "\n\n".join(chatbot.clean_chunk(e["text"])[:700] for e in evidence_items)
+    evidence_text = "\n\n".join(
+        chatbot.clean_chunk(e["text"])[:chatbot.GROUNDEDNESS_TRUNCATE_CHARS] for e in evidence_items
+    )
     user_prompt = f"Preuves :\n{evidence_text}\n\nReponse a evaluer :\n{final_answer}"
     result = chatbot.call_ollama_json(
         chatbot.CONTROL_MODEL, FAITHFULNESS_SYSTEM, user_prompt, FAITHFULNESS_SCHEMA
@@ -519,6 +521,7 @@ def write_report(results, report_path, chart_path, today, baseline_results=None)
         flagged=flagged,
         comparison=comparison,
         limitations=limitations,
+        ablation_csv_path=EVAL_DIR / "resultats_ablation.csv",
     )
 
 

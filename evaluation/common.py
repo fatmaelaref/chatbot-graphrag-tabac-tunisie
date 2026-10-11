@@ -112,9 +112,79 @@ def aggregate_by(results: list, key: str) -> dict:
     return out
 
 
+def write_ablation_section(csv_path) -> list:
+    """
+    Lit resultats_ablation.csv (produit par `ablation_graphe.py --finalize`)
+    et rend la section Markdown "Ablation du canal graphe". Calcule les
+    deltas par categorie depuis les donnees plutot que de les copier a la
+    main -- evite que cette section disparaisse ou devienne obsolete a
+    chaque regeneration complete du rapport par evaluate.py (bug constate
+    le 2026-10-11 : une section ajoutee a la main avait ete silencieusement
+    effacee par le run suivant).
+    """
+    import csv as csv_module
+    from pathlib import Path
+
+    csv_path = Path(csv_path)
+    if not csv_path.exists():
+        return []
+
+    rows = {}
+    with open(csv_path, encoding="utf-8") as f:
+        for row in csv_module.DictReader(f):
+            rows.setdefault(row["scope"], {})[row["config"]] = row
+
+    def fmt(v):
+        return v if v else "-"
+
+    lines = ["## Ablation du canal graphe (Cypher)", "",
+             "Comparaison sur le jeu de test complet entre trois configurations : "
+             "**A** = RAG simple (recherche vectorielle seule, 1 appel LLM), "
+             "**B** = pipeline complet avec `USE_GRAPH=0` (sans le canal graphe), "
+             "**C** = pipeline complet par défaut (avec le canal graphe).", ""]
+
+    g = rows.get("GLOBAL", {})
+    if g:
+        lines.append("| Métrique | A (RAG simple) | B (sans graphe) | C (avec graphe) |")
+        lines.append("|---|---|---|---|")
+        for key, label in [("precision_routage", "Précision routage"),
+                            ("rappel_elements", "Rappel éléments"),
+                            ("justesse_5", "Justesse (/5)"),
+                            ("latence_moy_s", "Latence moy. (s)"),
+                            ("taux_abstention", "Taux abstention")]:
+            a = fmt(g.get("A_rag_simple", {}).get(key))
+            b = fmt(g.get("B_sans_graphe", {}).get(key))
+            c = fmt(g.get("C_avec_graphe", {}).get(key))
+            lines.append(f"| {label} | {a} | {b} | {c} |")
+        lines.append("")
+
+    deltas = []
+    for scope, configs in sorted(rows.items()):
+        if scope == "GLOBAL":
+            continue
+        b, c = configs.get("B_sans_graphe"), configs.get("C_avec_graphe")
+        if not b or not c or not b.get("rappel_elements") or not c.get("rappel_elements"):
+            continue
+        deltas.append((
+            scope,
+            float(c["rappel_elements"]) - float(b["rappel_elements"]),
+            float(c["justesse_5"]) - float(b["justesse_5"]),
+        ))
+
+    if deltas:
+        lines.append("Par catégorie (B -> C, apport du canal graphe) :")
+        lines.append("")
+        for scope, d_rappel, d_justesse in deltas:
+            lines.append(f"- **{scope}** : rappel {d_rappel:+.3f} / justesse {d_justesse:+.3f}")
+        lines.append("")
+
+    return lines
+
+
 def write_markdown_report(path, title, meta: dict, global_stats: dict,
                            by_category: dict, by_type: dict, flagged: list,
-                           comparison: dict = None, limitations: list = None):
+                           comparison: dict = None, limitations: list = None,
+                           ablation_csv_path=None):
     lines = [f"# {title}", ""]
     for k, v in meta.items():
         lines.append(f"- **{k}** : {v}")
@@ -155,6 +225,9 @@ def write_markdown_report(path, title, meta: dict, global_stats: dict,
         for k, (pv, bv) in comparison.items():
             lines.append(f"| {k} | {pv} | {bv} |")
         lines.append("")
+
+    if ablation_csv_path is not None:
+        lines.extend(write_ablation_section(ablation_csv_path))
 
     if flagged:
         lines.append("## Échecs à regarder en priorité")

@@ -108,7 +108,9 @@ def semantic_similarity(a, b):
 def judge_faithfulness(answer, evidence_items):
     if not evidence_items:
         return {"score": None}
-    evidence_text = "\n\n".join(chatbot.clean_chunk(c["text"])[:700] for c in evidence_items)
+    evidence_text = "\n\n".join(
+        chatbot.clean_chunk(c["text"])[:chatbot.GROUNDEDNESS_TRUNCATE_CHARS] for c in evidence_items
+    )
     result = chatbot.call_ollama_json(chatbot.CONTROL_MODEL, FAITHFULNESS_SYSTEM,
                                        f"Preuves :\n{evidence_text}\n\nReponse a evaluer :\n{answer}",
                                        FAITHFULNESS_SCHEMA)
