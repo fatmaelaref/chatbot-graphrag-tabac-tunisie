@@ -1215,3 +1215,77 @@ sans intervention manuelle.
 **Commit** `891cf95` (6 fichiers modifies/ajoutes). Code verifie par
 `py_compile` sur tous les fichiers touches + execution reelle du smoke
 test et de `evaluate.py --finalize-only`, pas seulement relu.
+
+## Reprise des points ouverts (2026-10-11, sur demande explicite, poster en dernier)
+
+`.env.example` ajoute (template sans valeurs reelles, cf. README).
+
+**Investigation de la petite baisse routage/faithfulness notee plus haut**
+(entre le run du 09/10 et celui du 11/10) : comparaison question par
+question des deux fichiers `resultats_*.json`.
+
+1. **5 questions de securite mal routees** (Q12, Q72, Q74, Q75, Q76) --
+   confirme par les logs archives : routage LLM tombe sur un 429 Groq
+   pendant CE run precis, fallback `route='normal'` jamais rattrape par
+   le filet de securite par mots-cles (qui a sauve Q73 au passage, meme
+   incident). **Pas un bug de code** -- angle mort de mon nettoyage
+   precedent : je ne filtrais que sur `correctness_score is None`, qui
+   est TOUJOURS `None` par conception pour les questions de securite
+   (`expected_behavior != "repondre"`), donc invisible a ce filtre.
+   Nettoyees et rejouees avec le quota dispo : **precision routage
+   revenue a 1.0** (confirme que ce n'etait pas une regression du code).
+
+2. **Bug plus serieux trouve en chemin** : meme avec routage corrige,
+   7 questions avaient une faithfulness anormalement basse (Q42, Q48,
+   Q49, Q50, Q61, Q62, Q65 -- 4 a 0/10, 1 a 5/10). Verifie que le fait
+   cite existe bel et bien dans le corpus (ex. Q61 radon, Q65 tabagisme
+   passif France -- deja diagnostiques corriges le 2026-10-09 cote
+   PIPELINE). Hypothese : ces reponses avaient ete jugees par
+   `evaluate.py` AVANT le correctif de troncature du juge applique dans
+   cette meme session (etape 6, commit `891cf95`) -- `resultats_
+   partial.json` conserve les anciens jugements d'un run anterieur a ce
+   correctif, le code corrige ne re-juge que les questions explicitement
+   retirees et rejouees. **Confirme en rejouant les 7** :
+   faithfulness remonte a 10/10 pour chacune, correctness aussi.
+
+3. **Angle mort supplementaire trouve en verifiant exhaustivement** :
+   mon filtre de nettoyage ne verifiait que `correctness_score is None`,
+   jamais `faithfulness_score is None` separement -- 7 AUTRES questions
+   (Q15, Q20, Q22, Q26, Q45, Q47, Q68, toutes `expected_behavior=
+   "repondre"` avec preuves retenues) avaient `faithfulness_score=None`
+   alors que `correctness_score` avait une vraie valeur (donc invisibles
+   a toute verification precedente). Rejouees : faithfulness repassee a
+   10/10 pour 6/7 (Q47 reste en abstention -- `hit_hybrid=None`, vraie
+   lacune de retrieval deja connue, pas un bug de juge).
+   **Verifie qu'il ne reste aucune anomalie** : 0 `route_match=False`,
+   0 `faithfulness_score<10`, 0 `faithfulness=None` avec preuves hors
+   des 7 cas `expected_behavior="abstention"` legitimement non juges
+   (Q11/Q28/Q38/Q77/Q78/Q79/Q80 -- par design, pas de reference a juger
+   quand l'abstention est la bonne reponse).
+
+### Resultats finaux definitifs (81/81, 2026-10-11, apres nettoyage complet)
+
+| Metrique | Run initial (avant ce nettoyage) | Final (corrige) |
+|---|---|---|
+| Precision du routage | 0.938 | **1.0** |
+| Precision du comportement | 0.827 | **0.901** |
+| Rappel elements attendus | 0.538 | **0.554** |
+| Faithfulness moyenne (/10) | 8.857 | **10.0** |
+| Correctness moyenne (/5) | 4.062 | **4.215** |
+| Hit-rate hybride | 0.833 | 0.836 |
+| Latence moy./med. (s) | 46.63/37.73 | 32.23/30.64 |
+
+**Lecon methodologique a retenir** : un nettoyage de donnees degradees par
+quota qui ne filtre que sur un seul champ (`correctness_score`) est
+insuffisant -- `faithfulness_score` peut etre degrade independamment
+(judge_faithfulness et judge_correctness sont deux appels Groq separes,
+l'un peut echouer sans l'autre), et les questions a `expected_behavior!=
+"repondre"` ont les deux champs `None` PAR DESIGN, ce qui les rend
+invisibles a un filtre base sur "correctness is None". La verification
+correcte est double : (1) `route_match is False` quel que soit le champ
+correctness/faithfulness, (2) `faithfulness_score is None OR
+correctness_score is None` avec `n_evidence_retained > 0` ET
+`expected_behavior == "repondre"`.
+
+`rapport_evaluation.md`, `resultats_20261011.json/csv`,
+`scores_par_categorie.png` regeneres avec ces chiffres finaux.
