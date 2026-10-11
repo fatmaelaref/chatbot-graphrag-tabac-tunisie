@@ -84,6 +84,10 @@ Dans l'ordre, pour (re)construire le graphe et lancer le chatbot :
 5. **Interface web** : `streamlit run app_streamlit.py` (réutilise
    directement la logique de `3_chatbot_ULTIME.py`, rien à dupliquer).
 
+Pour vérifier rapidement que tout est opérationnel (Ollama/Neo4j/Groq +
+pipeline sur 2 questions, ~30s) sans lancer les 81 questions du jeu de
+test : `python smoke_test.py`.
+
 ## Évaluation
 
 ```bash

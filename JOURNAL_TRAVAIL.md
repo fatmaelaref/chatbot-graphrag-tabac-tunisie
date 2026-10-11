@@ -1163,3 +1163,55 @@ integration durable de la section ablation dans le generateur de rapport.
 A reprendre sur demande explicite -- pas de raison de se presser, le projet
 est maintenant versionne et documente, donc le risque de perte/confusion
 est deja tres reduit.
+
+## Etapes 6-8 (2026-10-11, sur confirmation explicite)
+
+**Etape 6 -- config centralisee** : le bloc de constantes de
+`3_chatbot_ULTIME.py` (lignes ~130-148) etait deja plutot bien regroupe ;
+le vrai probleme restant etait les 3 seuils de troncature des chunks
+montres aux LLM (grading/generation/groundedness), codes en dur a 3
+endroits differents (`[:1500]`, `[:2000]`, `[:2000]`) -- exactement le
+genre de duplication qui avait deja cause le bug de troncature a 700
+diagnostique le 2026-10-09. Nommees et regroupees :
+`GRADING_TRUNCATE_CHARS`, `GENERATION_TRUNCATE_CHARS`,
+`GROUNDEDNESS_TRUNCATE_CHARS`.
+
+**Bug trouve en chemin, non corrige avant** : `evaluation/evaluate.py` et
+`evaluation/baseline.py` ont chacun leur propre `judge_faithfulness()`
+(le juge d'EVALUATION, distinct de la verification de groundedness interne
+au pipeline) -- et ces deux juges tronquaient encore les preuves a 700
+caracteres, le correctif du 2026-10-09 n'ayant jamais ete propage a ces
+2 fichiers (seul `3_chatbot_ULTIME.py` avait ete corrige). Corrige : les
+deux utilisent maintenant `chatbot.GROUNDEDNESS_TRUNCATE_CHARS` (2000).
+**Decision prise** : ne PAS toucher `baseline.py` ligne 146 (troncature a
+700 de l'evidence envoyee a la generation du baseline lui-meme, pas a un
+juge) -- la changer invaliderait silencieusement la comparaison avec
+`resultats_baseline_20261009.json` deja publiee dans le rapport, sans
+qu'on ait demande de relancer le baseline. A rouvrir si un nouveau run de
+`baseline.py` est fait un jour.
+
+**Etape 7 -- smoke test** : `smoke_test.py` (nouveau, racine du projet).
+Verifie .env, `ollama list` (qwen2.5:7b + nomic-embed-text), connectivite
+Neo4j (nombre de noeuds), un appel Groq minimal, puis fait tourner
+`build_graph()` sur 2 questions (1 hors-domaine pour tester le routage
+sans generation, 1 factuelle complete pour tester recherche+generation+
+groundedness). Testee en reel : ~28s total, tout vert. Bug trouve et
+corrige pendant le test : `UnicodeEncodeError` sur la console Windows
+(cp1252) a cause des emojis imprimes par `3_chatbot_ULTIME.py` -- meme
+correctif que `evaluate.py` (`sys.stdout.reconfigure(encoding="utf-8")`).
+
+**Etape 8 -- ablation durable** : `evaluation/common.py` a maintenant
+`write_ablation_section(csv_path)`, qui lit `resultats_ablation.csv` et
+genere la section (tableau + deltas par categorie par rapport a B)
+directement depuis les donnees plutot que depuis un texte copie a la main
+-- donc meme si l'ablation est rejouee plus tard avec des chiffres
+differents, la section restera exacte. `write_markdown_report()` l'appelle
+automatiquement si `ablation_csv_path` est fourni ;
+`evaluate.py` le fournit systematiquement maintenant. **Verifie en reel** :
+`python evaluate.py --finalize-only` regenere `rapport_evaluation.md` et
+la section ablation apparait automatiquement avec les bons chiffres,
+sans intervention manuelle.
+
+**Commit** `891cf95` (6 fichiers modifies/ajoutes). Code verifie par
+`py_compile` sur tous les fichiers touches + execution reelle du smoke
+test et de `evaluate.py --finalize-only`, pas seulement relu.
