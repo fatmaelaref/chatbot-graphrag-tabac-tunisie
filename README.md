@@ -8,6 +8,16 @@ plutôt que d'inventer une information absente du corpus.
 
 Projet réalisé dans le cadre d'un stage de recherche (laboratoire LR01ES04).
 
+> **Note sur le corpus** : les présentations sources du laboratoire
+> (`documents/*.pptx`) et leur extraction texte (`textes/CHATBOT *.txt`,
+> 4 fichiers sur 10) ne sont pas incluses dans ce dépôt public (diffusion
+> non autorisée). Les 6 autres fichiers de `textes/` (sources publiques
+> OMS, NHS, CDC, Santé publique France) sont versionnés normalement. Le
+> graphe de connaissances ne peut donc pas être entièrement reconstruit
+> depuis ce dépôt seul ; le jeu de test et les résultats d'évaluation
+> (qui citent des faits, pas le contenu brut des diapositives) restent
+> inclus en totalité.
+
 ## Architecture
 
 ```

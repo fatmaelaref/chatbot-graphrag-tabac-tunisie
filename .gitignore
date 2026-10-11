@@ -14,6 +14,13 @@ archive/
 # Checkpoint de reprise d'evaluate.py -- transitoire, pas un résultat final
 evaluation/resultats_partial.json
 
+# Presentations du laboratoire (documents/*.pptx) et leur extraction texte
+# (textes/CHATBOT *.txt) -- diffusion non autorisee, restent uniquement en
+# local. Les 6 autres fichiers de textes/ (sources publiques OMS/NHS/CDC/
+# Sante publique France) ne sont pas concernes et restent versionnes.
+documents/*.pptx
+textes/CHATBOT*.txt
+
 # Logs ponctuels générés pendant les runs (build, chatbot, évaluation)
 log.txt
 log_*.txt
