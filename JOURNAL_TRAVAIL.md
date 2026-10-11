@@ -1409,6 +1409,53 @@ avec un quota journalier intact si un seul appel envoie trop de
 candidats a la fois). Toute augmentation future de `TOP_K_VECTOR`/
 `MAX_GRAPH_CANDIDATES` devra etre testee avec cette limite TPM en tete.
 
+### Q47 et Q19 -- diagnostic complementaire (meme principe : comprendre sans patcher a la hate)
+
+**Q47 (cafeine/arret du tabac)** : le fait existe reellement dans le
+corpus (`SOURCE_PDF_Quit_Guideline_Grossesse_Allaitement.txt`, ligne 118
+-- verifie directement, pas une lacune du corpus comme je l'ai cru un
+instant a cause d'un faux-negatif de ma propre recherche `grep` --
+probleme d'accent encode en UTF-8 cote `grep`, pas cote corpus). Requete
+vectorielle brute : le bon chunk **n'apparait meme pas dans le top 20**
+(pire que Q57). Cause : la phrase source enumere ~15 medicaments d'un
+coup ("benzodiazepines, beta-bloquants, cafeine, chlorpromazine,
+clozapine, duloxetine..."), donc l'embedding de ce chunk est domine par
+le theme general "interactions medicamenteuses psychiatriques" et non
+specifiquement par "cafeine" -- meme chunk qui sert tres bien Q42
+(inhalateur de nicotine, deja corrige plus haut dans la session) car
+cette question-la correspond mieux au theme dominant du chunk. Meme
+famille de cause que Q57 (une liste dense dilue le signal sur un element
+precis de la liste) mais plus severe. Pas corrige : un vrai correctif
+demanderait de re-chunker cette phrase (un fait par medicament) --
+changement de granularite de chunking, donc un rebuild/retraitement a
+tester et revalider, pas justifiable pour 1 question isolee.
+
+**Q19 (avertissements sanitaires paquets)** : le fait manquant (70% des
+2 faces, bilingue arabe+langue etrangere, approbation ministere, revision
+annuelle) existe dans **UN SEUL chunk** (diapositive 19 de CHATBOT 1),
+regroupe en une liste a puces -- verifie directement dans `textes/`.
+La reponse du chatbot (3 preuves retenues, meme fichier source) ne cite
+QUE le texte de la diapositive 18 (reference a l'arrete du 21 janvier
+2022) -- la diapositive 19 (le detail des regles elles-memes) n'a
+manifestement pas ete retenue parmi les 3 preuves, malgre le bon routage
+(question "legislation" -> route Loi, qui remonte bien le chunk de la
+LOI elle-meme mais pas forcement le chunk voisin qui en detaille le
+CONTENU). Hypothese : la chaine Loi -[:DANS_ARTICLE]- privilegie le
+chunk ou le noeud Loi est explicitement mentionne (diapo 18), pas le
+chunk suivant qui developpe son contenu sans re-nommer la loi (diapo 19)
+-- meme type de granularite que la confusion loi/contenu deja traitee
+pour le type Mesure. Pas corrige, meme raisonnement que Q47/Q57.
+
+**Conclusion sur ces 3 cas (Q19, Q47, Q57)** : tous bien compris
+maintenant (plus "lacune de retrieval" vague), tous de la meme famille
+(granularite de chunking -- une information precise noyee dans un chunk
+plus large centre sur un autre theme), aucun corrige par prudence
+(risque de regression plus large que le gain, cf. decouverte TPM). Piste
+commune pour une vraie passe de correction future, si le temps/budget le
+permet : revoir la strategie de chunking de `2_build_kg_ULTIME.py`
+(chunks plus courts/granulaires pour les listes denses) plutot que des
+rustines de routage au cas par cas.
+
 ### Bug extraction Mesure/Programme (PNRT) -- renforce a la racine, pas revalide
 
 `kg_config.py` (EXEMPLE 10) contenait deja un exemple nomme explicite
