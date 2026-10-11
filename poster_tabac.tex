@@ -1,0 +1,223 @@
+\documentclass[final]{beamer}
+\usepackage[orientation=landscape,size=a0,scale=1.4]{beamerposter}
+\usefonttheme{serif}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{mathptmx}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multicol}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,calc,positioning}
+\usepackage{xcolor}
+\usepackage{ragged2e}
+
+% ============================================================
+% COULEURS
+% ============================================================
+\definecolor{navy}{HTML}{1F3864}
+\definecolor{mid}{HTML}{4A6FA5}
+\definecolor{pale}{HTML}{B9C9E2}
+\definecolor{figgreen}{HTML}{2E8B57}
+\definecolor{pinkbox}{HTML}{FBE9EC}
+\definecolor{rouge}{HTML}{C0392B}
+\definecolor{tilebg}{HTML}{EAF0F7}
+\definecolor{textgray}{HTML}{1A1A1A}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{normal text}{fg=textgray}
+\setbeamercolor{itemize item}{fg=textgray}
+\setbeamertemplate{itemize item}{\small\textbullet}
+\setbeamertemplate{enumerate item}{\insertenumlabel.}
+
+% Titre de section : bleu, grand, filet dessous
+\newcommand{\sect}[1]{%
+  \par\vspace{0.55cm}
+  {\color{navy}\fontsize{48}{56}\selectfont\bfseries #1\par}
+  \vspace{0.25cm}{\color{navy}\hrule height 2.5pt}\vspace{0.5cm}}
+
+% Figure (cadre de remplacement si le fichier est absent) et légende verte
+\newcommand{\posterimg}[2]{%
+  \IfFileExists{#1}{\includegraphics[width=\linewidth,height=#2,keepaspectratio]{#1}}{%
+    \fbox{\parbox[c][#2][c]{0.95\linewidth}{\centering\itshape \detokenize{#1}}}}}
+\newcounter{fig}
+\newcommand{\legende}[1]{\stepcounter{fig}\par\vspace{0.3cm}{\centering\small\color{figgreen}\textbf{Figure \thefig} -- #1\par}\vspace{0.4cm}}
+
+% Encadrés
+\newcommand{\pointcle}[1]{\par\vspace{0.3cm}%
+  \colorbox{pinkbox}{\parbox{\dimexpr\linewidth-2\fboxsep}{\vspace{0.2cm}#1\vspace{0.2cm}}}\par\vspace{0.3cm}}
+\newcommand{\encadrebleu}[1]{\par\vspace{0.3cm}%
+  \colorbox{tilebg}{\parbox{\dimexpr\linewidth-2\fboxsep}{\vspace{0.3cm}#1\vspace{0.3cm}}}\par\vspace{0.3cm}}
+
+% Question-titre d'un tableau de bord
+\newcommand{\question}[1]{\par\vspace{0.2cm}{\color{navy}\itshape\bfseries #1\par}\vspace{0.3cm}}
+
+\setlength{\columnsep}{2.2cm}
+\setlength{\columnseprule}{1.5pt}
+\renewcommand{\columnseprulecolor}{\color{navy}}
+
+\begin{document}
+\begin{frame}[t]
+
+% ============================================================
+% EN-TÊTE
+% ============================================================
+\vspace{0.6cm}
+\begin{columns}[c,totalwidth=0.96\paperwidth]
+\begin{column}{0.68\paperwidth}
+  \raggedright
+  {\color{navy}\fontsize{90}{98}\selectfont\bfseries Un chatbot GraphRAG pour la lutte antitabac en Tunisie\par}
+  \vspace{0.5cm}
+  {\fontsize{60}{68}\selectfont\itshape Un assistant qui sait quand se taire -- sourc\'e, prudent, v\'erifi\'e question par question\par}
+  \vspace{0.6cm}
+  {\fontsize{64}{72}\selectfont\bfseries Fatma}\quad
+  {\color{navy}\fontsize{52}{60}\selectfont Stage de recherche -- Laboratoire LR01ES04 \quad|\quad Encadrante : Dr Salsabil Rejaibi\par}
+  \vspace{0.4cm}
+  {\Large \'Ecole Sup\'erieure de la Statistique et de l'Analyse de l'Information (ESSAI)\par}
+  \vspace{0.3cm}
+  {\Large Facult\'e de M\'edecine de Tunis \quad|\quad Octobre 2026\par}
+\end{column}
+\begin{column}{0.28\paperwidth}
+  \raggedleft
+  \IfFileExists{Logo_ESSAIT.png}{\includegraphics[height=9cm]{Logo_ESSAIT.png}}{\fbox{\parbox[c][8cm][c]{12cm}{\centering ESSAI}}}%
+  \hspace{2cm}%
+  \IfFileExists{Logo_LR01ES04.png}{\includegraphics[height=9cm]{Logo_LR01ES04.png}}{\fbox{\parbox[c][8cm][c]{12cm}{\centering LR01ES04}}}
+\end{column}
+\end{columns}
+
+\vspace{0.3cm}
+\begin{columns}[t,totalwidth=0.96\paperwidth]\begin{column}{0.96\paperwidth}{\color{navy}\rule{\linewidth}{4pt}}\end{column}\end{columns}
+
+\vspace{0.1cm}
+
+% ============================================================
+% CORPS -- 3 COLONNES SÉPARÉES PAR DES FILETS
+% ============================================================
+\begin{columns}[t,totalwidth=0.96\paperwidth]
+\begin{column}{0.96\paperwidth}
+\raggedcolumns
+\begin{multicols}{3}
+\justifying
+
+% ------------------------- COLONNE 1 -------------------------
+\sect{Contexte}
+Le tabagisme reste un enjeu majeur de sant\'e publique en Tunisie :
+\begin{itemize}
+  \item \textbf{25,1\,\%} des adultes fument (enqu\^ete THES 2016)
+  \item \textbf{13\,200} d\'ec\`es par an li\'es au tabac, soit 20\,\% de tous les d\'ec\`es
+  \item \textbf{1,8\,\%} du PIB (2 Md TND) chaque ann\'ee
+\end{itemize}
+Les informations existent (lois, enqu\^etes, rapports) mais elles sont dispers\'ees, h\'et\'erog\`enes et difficiles \`a interroger.
+
+\sect{Objectif}
+\encadrebleu{\centering\itshape Comment r\'epondre \`a une question m\'edicale sur le tabac, avec une source, sans jamais inventer ?\par\vspace{0.2cm}\upshape\small Principe : si les documents ne contiennent pas la r\'eponse, le chatbot le dit et s'abstient. Aucune extrapolation, aucune r\'eponse non sourc\'ee.}
+
+\sect{D\'emarche}
+\begin{enumerate}
+  \item \textbf{Corpus} : 10 documents (lois tunisiennes, enqu\^etes, sant\'e publique).
+  \item \textbf{Graphe de connaissances} : extraction d'entit\'es et de relations par LLM local (qwen2.5:7b), stockage dans Neo4j Aura.
+  \item \textbf{Recherche hybride} : vecteurs (embeddings) + requ\^etes Cypher.
+  \item \textbf{G\'en\'eration contr\^ol\'ee} : notation des passages, r\'eponse, puis v\'erification d'ancrage.
+\end{enumerate}
+\pointcle{\textbf{17 types d'entit\'es} (Loi, Mesure, Programme, Statistique, M\'edicament\ldots) et des relations explicites : Loi $\rightarrow$ \textsc{interdit} $\rightarrow$ Mesure.}
+
+\sect{Limites et perspectives}
+\begin{itemize}
+  \item Jeu de test de \textbf{81 questions} : intervalles de confiance larges par cat\'egorie (7 \`a 19 questions chacune).
+  \item Juge LLM imparfait, compl\'et\'e par un rappel d\'eterministe.
+  \item Ablations « sans graphe / sans grading » encore \`a mener (contrainte de quota).
+\end{itemize}
+
+\columnbreak
+
+% ------------------------- COLONNE 2 -------------------------
+\sect{Architecture du pipeline}
+\begin{center}
+\begin{tikzpicture}[
+    etape/.style={draw=navy, line width=1.3pt, fill=white, text width=0.125\linewidth,
+                  minimum height=3.6cm, align=center, inner sep=0.2cm, font=\scriptsize},
+    etaperouge/.style={draw=rouge, line width=1.3pt, fill=pinkbox, text width=0.125\linewidth,
+                  minimum height=3.6cm, align=center, inner sep=0.2cm, font=\scriptsize},
+    fl/.style={-{Stealth[length=0.5cm]}, line width=2pt, navy}]
+  \node[etape] (e1) at (0,0) {\textbf{Question}\\ utilisateur};
+  \node[etaperouge, right=0.6cm of e1] (e2) {\textbf{Routage}\\ \& s\'ecurit\'e};
+  \node[etape, right=0.6cm of e2] (e3) {\textbf{R\'e\'ecriture}\\ de la question};
+  \node[etape, right=0.6cm of e3] (e4) {\textbf{Recherche}\\ hybride\\ vecteur + graphe};
+  \node[etape, right=0.6cm of e4] (e5) {\textbf{Notation}\\ stricte};
+  \node[etape, right=0.6cm of e5] (e6) {\textbf{G\'en\'eration}};
+  \node[etape, right=0.6cm of e6] (e7) {\textbf{V\'erification}\\ ou abstention};
+  \draw[fl] (e1) -- (e2); \draw[fl] (e2) -- (e3); \draw[fl] (e3) -- (e4);
+  \draw[fl] (e4) -- (e5); \draw[fl] (e5) -- (e6); \draw[fl] (e6) -- (e7);
+  \foreach \i in {1,...,7}
+    \node[circle, fill=navy, text=white, font=\bfseries\scriptsize, minimum size=1.1cm] at (e\i.north east) {\i};
+\end{tikzpicture}
+\end{center}
+\legende{Pipeline LangGraph : chaque \'etape peut stopper et d\'eclencher l'abstention. L'\'etape 2 (en rouge) peut aussi rediriger directement vers un refus (urgence, demande personnelle, hors domaine).}
+
+\vspace{0.2cm}
+\begin{center}
+\begin{tabular}{ccc}
+{\color{navy}\fontsize{40}{44}\selectfont\bfseries 10} & {\color{navy}\fontsize{40}{44}\selectfont\bfseries 17} & {\color{navy}\fontsize{40}{44}\selectfont\bfseries 81} \\
+\footnotesize documents sources & \footnotesize types d'entit\'es & \footnotesize questions de test
+\end{tabular}
+\end{center}
+\vspace{0.3cm}
+
+\sect{Le graphe de connaissances}
+Exemple r\'eel extrait du corpus -- une loi tunisienne et les mesures qu'elle impose :
+\vspace{0.3cm}
+
+\posterimg{graphe_neo4j.png}{15cm}
+\legende{Extrait du graphe Neo4j : une loi et les mesures qu'elle impose, reli\'ees par la relation \textsc{interdit}.}
+
+17 types de n\oe uds au total (Loi, Programme, Pathologie, Statistique, Produit\ldots), extraits automatiquement par qwen2.5:7b \`a partir des 10 documents sources.
+
+\columnbreak
+
+% ------------------------- COLONNE 3 -------------------------
+\sect{R\'esultats}
+Jeu de test de 81 questions, 6 cat\'egories, juge LLM ind\'ependant du mod\`ele de g\'en\'eration :
+\vspace{0.3cm}
+
+{\centering
+\begin{tabular}{lrr}
+\toprule
+\textbf{M\'etrique} & \textbf{Avant} & \textbf{Apr\`es} \\
+\midrule
+Pr\'ecision du routage & 0.988 & \textbf{1.0} \\
+Rappel \'el\'ements attendus & 0.327 & \textbf{0.473} \\
+Correctness (/5, juge LLM) & 3.05 & \textbf{3.97} \\
+Latence moyenne & 91.0\,s & \textbf{40.7\,s} \\
+\bottomrule
+\end{tabular}\par}
+\vspace{0.4cm}
+
+\pointcle{\centering\color{navy}\fontsize{44}{48}\selectfont\bfseries 9/9\normalcolor\par\vspace{0.1cm}\normalfont\small questions de s\'ecurit\'e (urgence, demande personnelle, hors domaine) \textbf{correctement refus\'ees ou redirig\'ees} -- la preuve chiffr\'ee que le chatbot sait quand se taire.}
+\vspace{0.3cm}
+
+\posterimg{resultats_comparaison.png}{15cm}
+\legende{Comparaison avant/apr\`es nettoyage du graphe, et pipeline contr\^ol\'e vs. RAG simple (vecteur seul, 1 appel LLM, sans grading ni v\'erification).}
+
+\sect{Un bug trouv\'e et corrig\'e}
+\pointcle{Le LLM de tri des preuves ne voyait que les \textbf{700 premiers caract\`eres} de chaque passage retrouv\'e -- sur un chunk long, le fait recherch\'e tombait souvent apr\`es cette limite, invisible au moment du jugement. Corrig\'e (1500--2000 caract\`eres) et \textbf{v\'erifi\'e sur 3 cas r\'eels} (radon, inhalateur de nicotine, tabagisme passif) : les 3 r\'epondent d\'esormais correctement.}
+
+\sect{M\^eme question, deux r\'eponses}
+\question{« Quelle est la pr\'evalence du tabagisme chez les adultes en Tunisie selon l'enqu\^ete THES 2016 ? »}
+
+\colorbox{pinkbox}{\parbox{\dimexpr\linewidth-2\fboxsep}{\vspace{0.2cm}\small\color{rouge}\textbf{\textbullet\ LLM seul, sans ancrage :}\normalcolor\ \\ « \ldots environ \textbf{23\,\%} au total\ldots $\approx$36\,\% chez les hommes et $\approx$4\,\% chez les femmes. »\\[0.15cm]\textit{Chiffre faux, r\'epartition invent\'ee et non demand\'ee -- avec assurance.}\vspace{0.2cm}}}
+\vspace{0.4cm}
+
+\colorbox{tilebg}{\parbox{\dimexpr\linewidth-2\fboxsep}{\vspace{0.2cm}\small\color{navy}\textbf{\textbullet\ Pipeline GraphRAG :}\normalcolor\ \\ « \ldots la pr\'evalence globale du tabagisme chez les adultes en Tunisie est de \textbf{25,1\,\%} (source : CHATBOT 1 TABAC LEGISLATION ET DONNEES EPIDEMIO.txt). »\\[0.15cm]\textit{Chiffre exact, source citable et v\'erifiable.}\vspace{0.2cm}}}
+
+\sect{Ce qu'on en retient}
+Nettoyer le graphe et corriger un seul bug de troncature a mesurablement am\'elior\'e le rappel et la justesse. La rigueur de l'\'evaluation r\'ev\`ele des d\'efauts invisibles \`a l'\oe il nu, et chaque correctif reste v\'erifiable avant d'\^etre g\'en\'eralis\'e.
+
+\end{multicols}
+\end{column}
+\end{columns}
+
+\end{frame}
+\end{document}

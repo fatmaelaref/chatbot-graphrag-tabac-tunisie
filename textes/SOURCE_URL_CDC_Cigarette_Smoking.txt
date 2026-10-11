@@ -1,0 +1,33 @@
+=== SOURCE ===
+Titre: Cigarette Smoking
+Organisme: CDC (Centers for Disease Control and Prevention), États-Unis - Office on Smoking and Health
+URL: https://www.cdc.gov/tobacco/about/index.html
+Date de consultation: 22 août 2026
+Dernière révision indiquée par le CDC: 17 septembre 2024
+Portée géographique: États-Unis (chiffres nationaux américains, non transférables tels quels à la Tunisie)
+Note: L'URL initialement fournie (cdc.gov/tobacco/index.html) est une page d'accueil/portail sans contenu de fond; cette sous-page a été récupérée à la place car elle contient l'information substantielle.
+=== FIN SOURCE ===
+
+=== EN BREF ===
+Plus de 16 millions d'Américains vivent avec une maladie causée par le tabagisme.
+Le tabagisme et l'exposition à la fumée secondaire causent plus de 480 000 décès par an aux États-Unis, soit près d'un décès sur cinq.
+Le tabagisme nuit à presque tous les organes du corps.
+Arrêter de fumer réduit le risque de décès précoce et de développer des maladies liées au tabac.
+=== FIN EN BREF ===
+
+=== MALADIES CAUSÉES PAR LE TABAGISME ===
+Le tabagisme cause: le cancer, les maladies cardiaques et l'AVC, les maladies pulmonaires comme la bronchopneumopathie chronique obstructive (BPCO), le diabète de type 2, des effets nocifs sur la santé reproductive, ainsi que d'autres maladies incluant certaines affections oculaires et des problèmes du système immunitaire comme la polyarthrite rhumatoïde.
+Le tabagisme augmente aussi le recours aux soins de santé, les coûts de santé, et l'absentéisme au travail.
+=== FIN MALADIES ===
+
+=== TABAGISME PASSIF (contexte américain) ===
+L'exposition à la fumée secondaire contribue à plus de 40 000 décès chez les adultes non-fumeurs et 400 décès chez les nourrissons chaque année aux États-Unis.
+Chez l'adulte, la fumée secondaire peut causer une maladie coronarienne, un AVC et un cancer du poumon.
+Les enfants exposés à la fumée secondaire ont un risque accru d'infections respiratoires, d'infections de l'oreille, de crises d'asthme et de mort subite du nourrisson.
+=== FIN TABAGISME PASSIF ===
+
+=== BÉNÉFICES DE L'ARRÊT ===
+Arrêter de fumer est l'une des actions les plus importantes pour améliorer sa santé, à tout âge, quelle que soit la durée ou l'intensité du tabagisme antérieur.
+Cela réduit le risque de décès prématuré et le risque de maladies liées au tabac, incluant les maladies cardiaques, le cancer et la BPCO.
+Les traitements (counseling et médication) peuvent aider à arrêter de fumer.
+=== FIN BÉNÉFICES DE L'ARRÊT ===

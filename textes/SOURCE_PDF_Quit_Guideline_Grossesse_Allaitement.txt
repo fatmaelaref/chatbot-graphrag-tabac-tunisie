@@ -1,0 +1,125 @@
+=== SOURCE ===
+Titre: Supporting smoking cessation in pregnancy and breastfeeding - Guideline (General practice version)
+Organisme: Quit (Cancer Council Victoria) & The Royal Women's Hospital, Australie
+Type de document: Guide clinique de pratique générale, accepté par ACM Midwives, RANZCOG, RACGP
+Version: 2.0, Mai 2024
+URL de référence: quitcentre.org.au/maternity
+Portée géographique: Australie (attention: numéros de téléphone, PBS, Quitline non applicables hors Australie)
+=== FIN SOURCE ===
+
+=== POINTS CLÉS ===
+Les interventions non-pharmacologiques (intervention comportementale multi-séances, ex. Quitline) sont recommandées en première ligne pendant la grossesse et l'allaitement.
+Le traitement de substitution nicotinique (TSN) associé à une intervention comportementale peut être envisagé chez les femmes ne parvenant pas à l'abstinence par les méthodes non-pharmacologiques seules, ou en cas de dépendance nicotinique modérée à forte.
+Les autres thérapies orales non-nicotiniques (bupropion, varénicline) sont indiquées pour le sevrage en population générale mais ne sont pas actuellement recommandées pendant la grossesse ou l'allaitement, faute de données suffisantes d'efficacité et de sécurité.
+Les produits de vapotage à la nicotine ne sont pas recommandés pendant la grossesse ou l'allaitement, faute de données suffisantes.
+=== FIN POINTS CLÉS ===
+
+=== CONTEXTE ===
+Le tabagisme pendant la grossesse est associé à un risque accru de complications obstétricales, d'issues de naissance défavorables et de mortalité infantile. Les bénéfices de l'arrêt du tabac pendant la grossesse incluent une réduction des taux de faible poids de naissance, de naissance prématurée et d'admission en unité de soins intensifs néonatals (USIN).
+Le tabagisme maternel peut réduire la production de lait en diminuant les niveaux basaux de prolactine, modifier la composition et le goût du lait, et favoriser un sevrage précoce de l'allaitement. Arrêter de fumer pendant la période post-partum protège les bébés contre la mort subite inexpliquée du nourrisson (MSIN), les problèmes respiratoires, les infections de l'oreille, la perte auditive et les troubles du comportement. Encourager les femmes enceintes à allaiter peut les aider à rester abstinentes après l'accouchement.
+=== FIN CONTEXTE ===
+
+=== DÉFINITIONS ===
+Formes de TSN à action rapide: pastille, mini-pastille, gomme, inhalateur et spray buccal.
+Sevrage nicotinique: caractérisé par des symptômes débutant quelques heures après l'arrêt, culminant entre deux jours et une semaine, puis déclinant sur deux à plusieurs semaines.
+Produits de vapotage à la nicotine: solutions contenant de la nicotine (sel ou base) destinées à être inhalées via un dispositif de vapotage.
+Dispositifs de vapotage: appareils électroniques chauffant les produits de vapotage pour libérer un aérosol inhalé (cigarettes électroniques, cigares électroniques, stylos, etc.).
+=== FIN DÉFINITIONS ===
+
+=== MODÈLE ASK-ADVISE-HELP ===
+Le modèle "Ask, Advise, Help" (Demander, Conseiller, Aider) vise à connecter les personnes qui fument aux traitements de référence contre la dépendance tabagique.
+
+ASK (Demander) - Interroger sur le statut tabagique:
+Lors du premier rendez-vous prénatal, interroger toutes les femmes sur leur statut tabagique et documenter: fume actuellement / a fumé auparavant (y compris arrêt spontané dû à la grossesse - documenter la date d'arrêt) / utilise actuellement une pharmacothérapie pour arrêter / n'a jamais fumé.
+Proposer un monitoring du monoxyde de carbone (CO) expiré à toutes les femmes si disponible, comme aide motivationnelle visuelle.
+Redemander le statut tabagique à chaque rendez-vous prénatal ou postnatal ultérieur, une rechute pouvant survenir.
+
+ADVISE (Conseiller):
+Conseiller d'arrêter complètement plutôt que de réduire, personnaliser les bénéfices pour la femme et le bébé, présenter la meilleure méthode d'arrêt (intervention comportementale + TSN si cliniquement approprié).
+Si la femme n'est pas prête à arrêter: explorer les freins, discuter l'importance de suivre le statut tabagique à chaque visite.
+Impliquer le partenaire et les proches fumeurs, proposer une orientation vers une intervention comportementale.
+
+HELP (Aider):
+Proposer un soutien au sevrage à toutes les femmes fumant actuellement ou ayant récemment arrêté.
+Référer vers un médecin généraliste si: conditions médicales sous-jacentes (maladie cardiovasculaire, maladie mentale, diabète), prise concomitante de médicaments, historique complexe de tentatives d'arrêt avec symptômes de sevrage.
+=== FIN MODÈLE ASK-ADVISE-HELP ===
+
+=== ÉVALUATION DE LA DÉPENDANCE NICOTINIQUE (HSI) ===
+La dépendance nicotinique peut être évaluée avec le Heaviness of Smoking Index (HSI):
+
+Question 1 - Nombre de cigarettes par jour: 10 ou moins = 0 point / 11 à 20 = 1 point / 21 à 30 = 2 points / 31 ou plus = 3 points
+Question 2 - Délai avant la première cigarette après le réveil: après 60 minutes = 0 point / 31 à 60 minutes = 1 point / 6 à 30 minutes = 2 points / dans les 5 minutes = 3 points
+
+Score total et niveau de dépendance: 0 à 2 = dépendance faible / 3 à 4 = dépendance modérée / 5 à 6 = dépendance forte
+=== FIN ÉVALUATION HSI ===
+
+=== RECOMMANDATIONS DE TRAITEMENT SELON LE NIVEAU DE DÉPENDANCE ===
+Dépendance faible (HSI 0-2): intervention comportementale multi-séances seule.
+Dépendance modérée (HSI 3-4): intervention comportementale +/- forme à action rapide.
+Dépendance forte (HSI 5-6): intervention comportementale + patch nicotinique +/- forme à action rapide.
+Si les envies ou symptômes de sevrage ne sont pas contrôlés, consulter un médecin généraliste et envisager l'ajout d'une forme à action rapide, l'ajout d'un patch, ou la maximisation des doses.
+=== FIN RECOMMANDATIONS SELON DÉPENDANCE ===
+
+=== TRAITEMENT DE SUBSTITUTION NICOTINIQUE (TSN) - GROSSESSE ===
+Le TSN peut être introduit à n'importe quel trimestre.
+Utiliser la dose efficace la plus faible pendant la durée la plus courte possible pour minimiser l'exposition foetale à la nicotine. Pour prévenir la rechute, poursuivre le TSN jusqu'à ce que la femme puisse résister aux envies. Le TSN peut ensuite être arrêté brutalement, sans sevrage progressif nécessaire.
+Les femmes ayant rechuté par le passé ou ressentant des envies avec une seule forme de TSN peuvent envisager un TSN combiné (patch + forme à action rapide) sous supervision médicale.
+Le TSN est considéré sûr comparé au tabagisme pendant la grossesse et bien toléré, bien que des effets indésirables mineurs puissent survenir.
+=== FIN TSN GROSSESSE ===
+
+=== TRAITEMENT DE SUBSTITUTION NICOTINIQUE (TSN) - ALLAITEMENT ===
+Les informations disponibles sur l'usage du TSN pendant l'allaitement sont limitées. L'usage maternel de TSN est considéré comme une option plus sûre que la poursuite du tabagisme.
+La nicotine et la cotinine (métabolite principal) sont transférées dans le lait maternel et peuvent avoir des effets négatifs à court et long terme chez le nourrisson allaité. La nicotine pourrait réduire la production de lait maternel via une diminution de la prolactine basale.
+Une étude a montré des concentrations de nicotine/cotinine dans le lait similaires entre femmes fumant activement et celles utilisant des patchs de 21 mg/jour, mais significativement plus basses avec des patchs de 14 mg/jour et 7 mg/jour.
+Pour les formes à action rapide (gommes, pastilles), attendre environ 2 à 3 heures avant de reprendre l'allaitement pour réduire l'exposition du nourrisson à la nicotine.
+=== FIN TSN ALLAITEMENT ===
+
+=== TABLEAU: RISQUES ET BÉNÉFICES DU TSN EN GROSSESSE/ALLAITEMENT ===
+Risques: effets à long terme inconnus; effets indésirables possibles; association potentielle avec faible poids de naissance, naissance prématurée, mortinaissance et/ou déficit cognitif (bien que des études n'aient pas corroboré ces associations); la nicotine réduit la production de lait maternel.
+Bénéfices: le TSN délivre généralement moins de nicotine que le tabagisme; source "propre" de nicotine sans les autres substances toxiques de la fumée; efficace pour augmenter le sevrage pendant la grossesse; l'exposition du nourrisson via le lait peut être réduite avec des formes à action rapide prises juste après l'allaitement; les nourrissons de femmes ayant arrêté via TSN ont montré de meilleurs résultats développementaux à deux ans comparé aux femmes n'ayant pas arrêté.
+=== FIN TABLEAU RISQUES/BÉNÉFICES ===
+
+=== AUTRES PHARMACOTHÉRAPIES ===
+Varénicline - Grossesse: les données limitées disponibles n'associent pas la varénicline maternelle à un risque accru d'anomalies congénitales ou d'issues défavorables, mais les données de sécurité étant insuffisantes, une alternative est recommandée pendant la grossesse; le traitement doit être arrêté en cas de grossesse survenant sous varénicline.
+Varénicline - Allaitement: aucune donnée disponible; envisager une alternative avec de meilleures données de sécurité.
+
+Bupropion - Grossesse: le bupropion et ses métabolites actifs traversent le placenta; l'usage maternel n'a pas été associé à un risque accru d'anomalies congénitales, mais une alternative avec de meilleures données de sécurité est recommandée.
+Bupropion - Allaitement: de très faibles quantités passent dans le lait maternel sans effets indésirables sérieux rapportés dans la majorité des cas, mais un cas isolé de possible activité convulsive chez un nourrisson partiellement allaité a été documenté (résolu à l'arrêt du bupropion maternel); une alternative est recommandée si possible.
+
+Produits de vapotage à la nicotine: aucun produit approuvé par l'organisme réglementaire australien (TGA) à ce jour; données très limitées en grossesse/allaitement; des études suggèrent une association possible avec naissance prématurée, poids de naissance réduit et petit poids pour l'âge gestationnel; non recommandés en grossesse ou allaitement.
+=== FIN AUTRES PHARMACOTHÉRAPIES ===
+
+=== RÉVISION DES CONDITIONS MÉDICALES SOUS-JACENTES (avant TSN) ===
+Maladie mentale: les symptômes de sevrage tabagique (humeur dépressive, irritabilité, anxiété) peuvent être confondus avec des symptômes de maladie mentale; référer à un professionnel de santé mentale.
+Maladie cardiovasculaire: le tabagisme contribue aux événements cardiovasculaires; le TSN chez les femmes avec maladie cardiovasculaire sous-jacente n'est pas associé à un risque accru d'événements cardiovasculaires mais doit être utilisé sous supervision médicale.
+Diabète (y compris gestationnel): la nicotine peut diminuer l'absorption de l'insuline par vasoconstriction périphérique; surveiller la glycémie et envisager un ajustement de dose d'insuline; privilégier des formes à action rapide sans sucre.
+Maladie cutanée généralisée: le patch nicotinique peut ne pas convenir en cas de prurit (cholestase obstétricale, éruptions prurigineuses de la grossesse); privilégier les formes à action rapide.
+Nausées/vomissements, RGO: les formes à action rapide peuvent aggraver les nausées; avaler de la nicotine peut aggraver l'oesophagite ou l'ulcère; veiller à la bonne utilisation des formes à action rapide.
+Phénylcétonurie (PCU): éviter les formes à action rapide contenant de l'aspartame.
+Prothèses dentaires ou travaux dentaires complexes: éviter la gomme nicotinique (risque de collage/dommage); envisager une alternative.
+Asthme: utiliser l'inhalateur nicotinique avec prudence (peut irriter la gorge et provoquer la toux).
+=== FIN CONDITIONS MÉDICALES ===
+
+=== TABLEAU: FORMES DE TSN, DOSAGES ET EFFETS INDÉSIRABLES ===
+Pastille/mini-pastille (2mg, 4mg, hors remboursement): une pastille toutes les 1-2h, jusqu'à 15 pastilles/24h (max 12 pastilles de 2mg/24h en combinaison avec un patch). Laisser dissoudre lentement en bouche (jusqu'à 30 min), déplacer d'un côté à l'autre, ne pas mâcher ni avaler. Éviter chez les femmes avec PCU (aspartame). Effets indésirables: nausées, vomissements, indigestion, hoquet.
+
+Gomme (2mg, 4mg, hors remboursement): une gomme toutes les 1-2h, jusqu'à 20 gommes de 2mg ou 10 de 4mg/24h (max 12 gommes de 2mg/24h en combinaison avec patch). Mâcher lentement (environ dix fois) jusqu'à un goût piquant, puis placer entre gencive et joue; répéter jusqu'à disparition du goût (jusqu'à 30 min). Peut ne pas convenir en cas de prothèses dentaires; éviter chez PCU. Effets indésirables: nausées, vomissements, indigestion, hoquet.
+
+Inhalateur (15mg, hors remboursement): contenu d'une cartouche inhalé au besoin (jusqu'à 6 cartouches/24h). Inhalations courtes et superficielles; éviter l'inhalation profonde; environ 8-10 bouffées d'inhalateur substituent une bouffée de cigarette; chaque cartouche remplace environ 7 cigarettes. Prudence en cas d'asthme ou de troubles chroniques de la gorge. Effets indésirables: irritation bouche/gorge, toux, nausées, vomissements, indigestion, hoquet.
+
+Spray buccal (1mg, hors remboursement): 1-2 pulvérisations toutes les 30-60 min (max 4/heure, 64/24h; max 2/heure et 32/24h en combinaison avec patch). Contient de petites quantités d'alcool - non considéré première ligne en grossesse/allaitement. Amorcer la pompe avant la première utilisation. Pulvériser à l'intérieur de la joue ou sous la langue, ne pas inhaler, éviter d'avaler quelques secondes. Effets indésirables: irritation bouche/gorge, toux, nausées, vomissements, indigestion, hoquet.
+
+Patch 16 heures (25mg remboursé, 15mg et 10mg non remboursés): un patch par jour, appliqué au réveil et retiré au coucher, sur peau propre et sèche de la partie supérieure du corps, en alternant les sites d'application. Effets indésirables: irritation cutanée, érythème, troubles du sommeil, rêves vifs.
+
+Patch 24 heures (21mg, 14mg, 7mg, remboursés): mêmes principes d'application. Envisager le patch 21mg/24h ou 15mg/16h en cas de forte dépendance nicotinique.
+=== FIN TABLEAU FORMES TSN ===
+
+=== INTERACTIONS MÉDICAMENTEUSES AVEC LE TABAGISME (extrait, liste non exhaustive) ===
+Le tabagisme accélère la clairance de plusieurs médicaments via l'induction du cytochrome P450 1A2. À l'arrêt du tabac, la clairance diminue et un ajustement de dose peut être nécessaire pour: benzodiazépines, bêta-bloquants, caféine (réduire l'apport de 50%), chlorpromazine, clozapine, duloxétine, flécaïnide, fluvoxamine, halopéridol, insuline (risque d'hypoglycémie à surveiller), méthadone (risque de toxicité opioïde à surveiller), mirtazapine, olanzapine, théophylline, antidépresseurs tricycliques (amitriptyline, clomipramine, imipramine), warfarine (surveiller l'INR).
+=== FIN INTERACTIONS MÉDICAMENTEUSES ===
+
+=== AUTEURS ET RÉVISEURS ===
+Auteure principale: Yuan Loke (Pharmacienne senior en information médicamenteuse, The Women's).
+Contributeurs: Hao Vo-Tran, Dr Eileen Cole (Quit), Jennifer Kyi (Quit), Emma Dean (Quit).
+Réviseurs: Dr Sarah Malone (obstétricienne), Dr Yvonne Bonomo (médecine addictologique), Trish Ryan, Julie Blandthorn.
+=== FIN AUTEURS ===

@@ -1,0 +1,18 @@
+stem,theme
+CHATBOT 1 TABAC LEGISLATION ET DONNEES EPIDEMIO,legislation
+CHATBOT 1 TABAC LEGISLATION ET DONNEES EPIDEMIO,epidemiologie
+CHATBOT 2 Impact santé et avantages sevrage,sante
+CHATBOT 2 Impact santé et avantages sevrage,sevrage
+CHATBOT 3 SEVRAGE AVEC LES SUBSTITUTS NICOTINIQUES,sevrage
+CHATBOT 4 DEPENDANCE TABAGIQUE,dependance
+SOURCE_PDF_Quit_Guideline_Grossesse_Allaitement,sevrage
+SOURCE_PDF_Quit_Guideline_Grossesse_Allaitement,grossesse_allaitement
+SOURCE_URL_CDC_Cigarette_Smoking,sante
+SOURCE_URL_CDC_Cigarette_Smoking,epidemiologie
+SOURCE_URL_NHS_Ecigarettes,sevrage
+SOURCE_URL_NHS_Ecigarettes,produits_alternatifs
+SOURCE_URL_NHS_Tabagisme_Passif,tabagisme_passif
+SOURCE_URL_OMS_Tabac_Fiche,epidemiologie
+SOURCE_URL_OMS_Tabac_Fiche,legislation
+SOURCE_URL_SantePubliqueFrance_Consequences,sante
+SOURCE_URL_SantePubliqueFrance_Consequences,tabagisme_passif

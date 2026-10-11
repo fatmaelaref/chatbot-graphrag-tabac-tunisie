@@ -1,0 +1,57 @@
+=== SOURCE ===
+Titre: Quelles sont les conséquences du tabagisme sur la santé ?
+Organisme: Santé publique France (agence nationale de santé publique française)
+URL: https://www.santepubliquefrance.fr/tabac/quelles-sont-les-consequences-du-tabagisme-sur-la-sante
+Date de consultation: 22 août 2026
+Dernière mise à jour indiquée par Santé publique France: 15 octobre 2025
+Portée géographique: France (chiffres de mortalité et lois citées sont français, non transférables tels quels à la Tunisie)
+=== FIN SOURCE ===
+
+=== CHIFFRES CLÉS FRANCE ===
+Le tabac reste responsable de plus de 68 000 décès prématurés en 2023 en France, soit 11% de la mortalité totale, ce qui en fait la première cause de mortalité évitable dans le pays.
+Depuis le lancement du premier Plan national de réduction du tabagisme (PNRT), le nombre de fumeurs quotidiens de 18 à 75 ans a diminué de 4 millions en 10 ans.
+En moyenne, un fumeur régulier sur deux meurt des conséquences de son tabagisme.
+=== FIN CHIFFRES CLÉS FRANCE ===
+
+=== COMPOSITION DE LA FUMÉE DE TABAC ===
+La fumée de tabac est un aérosol (mélange de gaz et de particules) formé à une température pouvant atteindre 1000 à 1500°C. Les 2500 composés chimiques du tabac non brûlé se transforment alors en plus de 4000 substances, dont beaucoup sont toxiques.
+On y retrouve systématiquement la nicotine, les goudrons et des agents de saveur, ainsi que des gaz toxiques (monoxyde de carbone, oxyde d'azote, acide cyanhydrique, ammoniac) et des métaux lourds (cadmium, plomb, chrome, mercure).
+La nicotine est l'alcaloïde responsable de la dépendance; celle-ci apparaît dès les premières semaines d'exposition, même pour une faible consommation.
+=== FIN COMPOSITION FUMÉE ===
+
+=== CIGARETTES "LÉGÈRES": UNE FAUSSE BONNE IDÉE ===
+La fumée des cigarettes dites "light" est quasiment identique à celle des cigarettes classiques. L'effet "light" repose sur des micropores du filtre qui diluent la fumée lors des tests en machine. Un fumeur dépendant, recherchant inconsciemment sa dose de nicotine habituelle, compense en prenant des bouffées plus grandes - la "light" se comporte alors comme une cigarette classique. Les appellations "light", "légères" et "mild" ont été interdites en France depuis septembre 2003.
+=== FIN CIGARETTES LÉGÈRES ===
+
+=== MALADIES CAUSÉES PAR LE TABAGISME ===
+Un cancer sur trois est dû au tabagisme. Le plus connu est le cancer du poumon (80 à 90% des cas liés au tabagisme actif), mais aussi les cancers de la gorge, bouche, lèvres, pancréas, reins, vessie, utérus. Le cancer de l'oesophage est plus fréquent en cas d'association tabac-alcool.
+Maladies cardiovasculaires: le tabac est un facteur de risque majeur d'infarctus du myocarde, d'AVC, d'artérite des membres inférieurs, d'anévrismes et d'hypertension artérielle; peut aussi provoquer des troubles de l'érection.
+BPCO (bronchopneumopathie chronique obstructive): maladie respiratoire essentiellement due au tabagisme, pouvant évoluer vers une insuffisance respiratoire chronique; le tabagisme aggrave la maladie à tout stade.
+Autres pathologies liées ou aggravées: gastrites, ulcères gastro-duodénaux, diabète de type 2, hypercholestérolémie, hypertriglycéridémie, eczéma, psoriasis, lupus, infections ORL et dentaires, cataracte, DMLA (pouvant mener à la cécité), parodontite (déchaussement et perte des dents).
+Effets additionnels: diminution des capacités sexuelles et de la fertilité, altération de l'épiderme (rides précoces, teint terne), coloration des dents, altération des muqueuses et de l'odorat/goût, carences en vitamines B et C, atteinte des artères cérébrales (mémoire, vision, audition), atteintes de l'oesophage et de l'estomac.
+Association tabac-radon: le risque de cancer du poumon est multiplié par 20 en cas d'exposition combinée au tabac et à une exposition prolongée au radon (gaz radioactif naturel s'accumulant dans les bâtiments mal ventilés).
+Il n'existe aucun seuil en dessous duquel fumer ne représente pas de risque. Le seul moyen efficace de réduire ce risque est l'arrêt du tabac.
+=== FIN MALADIES ===
+
+=== TABAGISME ET GROSSESSE ===
+Pour la grossesse elle-même: le tabac serait responsable d'environ 35% des grossesses extra-utérines; le risque de fausse couche précoce est triplé; le tabac est une cause d'accouchement prématuré.
+Pour le développement du foetus: le monoxyde de carbone inhalé par la mère réduit l'oxygénation du foetus, et la nicotine nuit à la circulation sanguine, pouvant causer un retard de croissance intra-utérin (petit poids de naissance, petite taille, petit périmètre crânien).
+Le tabagisme passif subi par les femmes enceintes non-fumeuses affecte également l'enfant à naître, les produits chimiques passant dans le sang maternel puis foetal.
+Fumer peut aussi augmenter le délai nécessaire à la conception; l'arrêt du tabac permet un retour à la normale.
+=== FIN GROSSESSE ===
+
+=== TABAGISME PASSIF ===
+Le tabagisme passif désigne l'inhalation de la fumée dégagée par un ou plusieurs fumeurs; la fumée de tabac contient plus de 4000 substances chimiques dont la nicotine, des irritants, des produits toxiques (monoxyde de carbone, goudrons) et plus de 50 cancérogènes. Il est nocif même en environnement ouvert (terrasses, auvents).
+En France en 2014, 15,5% des 15-75 ans en emploi étaient exposés à la fumée d'autrui sur leur lieu de travail; 28,2% déclaraient qu'une personne fumait à l'intérieur de leur domicile (en baisse depuis 32,8% en 2005). Chez les jeunes de 17 ans, 24,0% déclaraient une exposition à domicile et 62,9% devant leur établissement scolaire (2017).
+Plusieurs centaines de non-fumeurs meurent prématurément chaque année en France de maladies provoquées par le tabagisme passif, dont environ 1100 adultes par infarctus, AVC, cancer du poumon ou maladies respiratoires chroniques.
+
+Effets sur le foetus (tabagisme actif de la mère): risque accru de fausse couche, grossesse extra-utérine, accouchement prématuré; retard de développement foetal; plus petit poids de naissance; augmentation de 47% du risque de mort foetale in-utero; réduction des capacités scolaires et cognitives; risque accru de malformations congénitales. Le tabagisme passif subi par la mère (conjoint fumeur) a un effet mesurable mais moindre.
+Effets sur le nourrisson: fumer en présence d'un nourrisson double le risque de mort subite du nourrisson.
+Effets sur le jeune enfant: irritation des yeux/nez/gorge, rhinopharyngites et otites plus fréquentes, risque accru d'asthme et d'infections respiratoires (pneumonie, bronchite), diminution significative mais faible du développement pulmonaire.
+Effets sur l'adulte non-fumeur: risque de crise cardiaque augmenté de 27% par exposition à la fumée; risque de cancer du poumon augmenté de 25% si le conjoint fume; risque de cancer des sinus plus que doublé; risque d'AVC doublé (altération des parois artérielles).
+=== FIN TABAGISME PASSIF ===
+
+=== CADRE LÉGISLATIF FRANÇAIS (contexte France uniquement) ===
+Depuis le 1er février 2007: interdiction de fumer dans tous les lieux collectifs fermés et couverts accueillant du public ou constituant des lieux de travail, dans les transports collectifs, et dans l'enceinte des écoles/collèges/lycées et établissements accueillant des mineurs.
+Depuis le 1er janvier 2008: interdiction de fumer dans les lieux de convivialité (bars, restaurants, discothèques, casinos).
+=== FIN CADRE LÉGISLATIF ===

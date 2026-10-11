@@ -1,0 +1,20 @@
+# Secrets -- ne jamais committer
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+evaluation/__pycache__/
+
+# Fichiers de session/debug et sauvegardes volumineuses -- conservés sur
+# disque dans archive/, jamais versionnés (régénérables ou obsolètes)
+archive/
+
+# Checkpoint de reprise d'evaluate.py -- transitoire, pas un résultat final
+evaluation/resultats_partial.json
+
+# Logs ponctuels générés pendant les runs (build, chatbot, évaluation)
+log.txt
+log_*.txt
+evaluation/log_*.txt

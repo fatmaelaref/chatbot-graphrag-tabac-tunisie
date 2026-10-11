@@ -1,0 +1,40 @@
+=== SOURCE ===
+Titre: Using e-cigarettes to stop smoking
+Organisme: NHS (National Health Service), Royaume-Uni
+URL: https://www.nhs.uk/live-well/quit-smoking/using-e-cigarettes-to-stop-smoking/
+Date de consultation: 22 août 2026
+Dernière révision indiquée par le NHS: 15 juillet 2026 (prochaine révision prévue: 15 juillet 2029)
+Portée géographique: Royaume-Uni (attention: la vente aux moins de 18 ans est interdite au Royaume-Uni; la réglementation tunisienne peut différer)
+Note de cohérence: cette source présente le vapotage comme aide au sevrage relativement positive pour la population générale adulte, ce qui contraste avec la position plus prudente de l'OMS sur les cigarettes électroniques (voir SOURCE_URL_OMS_Tabac_Fiche.txt) - à garder à l'esprit lors de la construction des réponses du chatbot, qui devra présenter les deux nuances plutôt qu'une position tranchée.
+=== FIN SOURCE ===
+
+=== PRINCIPE GÉNÉRAL ===
+Les cigarettes électroniques (vapes) sont devenues une aide populaire à l'arrêt du tabac au Royaume-Uni. Elles seraient nettement moins nocives que les cigarettes classiques et peuvent aider à arrêter définitivement de fumer. Interdites à la vente aux moins de 18 ans; non recommandées pour les non-fumeurs.
+=== FIN PRINCIPE GÉNÉRAL ===
+
+=== FONCTIONNEMENT ===
+Une cigarette électronique permet d'inhaler de la nicotine sous forme de vapeur plutôt que de fumée. Elle ne brûle pas de tabac et ne produit ni goudron ni monoxyde de carbone, deux des éléments les plus nocifs de la fumée de tabac. Elle chauffe un e-liquide (contenant généralement nicotine, propylène glycol, glycérine végétale et arômes) pour créer la vapeur.
+=== FIN FONCTIONNEMENT ===
+
+=== EFFICACITÉ POUR ARRÊTER DE FUMER ===
+Une revue de 2021 a montré que les personnes utilisant une cigarette électronique pour arrêter de fumer, en complément d'un accompagnement expert en face à face, peuvent avoir jusqu'à deux fois plus de chances de réussir que celles utilisant d'autres substituts nicotiniques (patchs, gommes).
+Un bénéfice complet n'est obtenu qu'en arrêtant complètement la cigarette classique. Un accompagnement par un service spécialisé d'aide à l'arrêt donne les meilleures chances de réussite.
+=== FIN EFFICACITÉ ===
+
+=== SÉCURITÉ ===
+Au Royaume-Uni, les cigarettes électroniques sont strictement réglementées pour la sécurité et la qualité. Le vapotage n'est pas totalement sans risque, mais représente une fraction du risque du tabagisme. Les risques à long terme ne sont pas encore clairement établis.
+Le liquide et la vapeur contiennent certaines substances chimiques potentiellement nocives également présentes dans la fumée de cigarette, mais à des niveaux bien plus faibles.
+La nicotine est la substance addictive des cigarettes et peut être nocive à haute dose, mais l'essentiel du dommage du tabagisme provient des milliers d'autres substances chimiques de la fumée de tabac, dont beaucoup sont toxiques.
+=== FIN SÉCURITÉ ===
+
+=== GROSSESSE ===
+Peu de recherches ont été menées sur la sécurité des cigarettes électroniques pendant la grossesse; on ignore si la vapeur est nocive pour le bébé. Pour les femmes enceintes, les produits de substitution nicotinique homologués (patchs, gommes) sont l'option recommandée. Consulter un médecin généraliste pour un avis personnalisé.
+=== FIN GROSSESSE ===
+
+=== RISQUE INCENDIE ===
+Des cas d'explosion ou d'incendie de cigarettes électroniques ont été rapportés. Comme pour tout appareil électrique rechargeable, utiliser le bon chargeur et ne pas laisser l'appareil en charge sans surveillance ou toute la nuit.
+=== FIN RISQUE INCENDIE ===
+
+=== VAPOTAGE PASSIF ===
+Aucune preuve à ce jour ne montre que la vapeur de cigarette électronique nuit aux personnes environnantes, bien que davantage de recherche soit nécessaire. Le tabagisme passif classique reste, lui, bien établi comme très nocif.
+=== FIN VAPOTAGE PASSIF ===
