@@ -1,0 +1,18 @@
+# Dependances Python du projet (figees sur les versions testees).
+# Ollama (serveur local, modeles qwen2.5:7b + nomic-embed-text) n'est PAS
+# un paquet pip -- a installer separement depuis https://ollama.com.
+
+python-dotenv==1.2.2
+neo4j==6.2.0
+neo4j-graphrag==1.18.0
+langgraph==1.2.11
+langgraph-checkpoint==4.2.0
+openai==3.8.0
+ollama==0.6.1
+streamlit==1.51.0
+matplotlib==3.8.4
+pdfplumber==0.11.10
+python-pptx==1.0.2
+pytesseract==0.3.13
+Pillow==12.2.0
+PyMuPDF==1.28.2
