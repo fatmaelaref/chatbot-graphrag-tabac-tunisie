@@ -21,9 +21,9 @@
 | Hit-rate retrieval (graphe seul) | 0.462 |
 | MRR vecteur | 0.572 |
 | MRR graphe | 0.139 |
-| Latence moyenne (s) | 32.234 |
-| Latence médiane (s) | 30.64 |
-| Appels LLM moyens / question | 4.704 |
+| Latence moyenne (s) | 31.508 |
+| Latence médiane (s) | 30.57 |
+| Appels LLM moyens / question | 4.728 |
 
 ## Par catégorie
 
@@ -31,7 +31,7 @@
 |---|---|---|---|---|---|---|---|---|
 | dependance | 7 | 1.0 | 0.571 | 0.595 | 10.0 | 3.429 | 0.5 | 43.661 |
 | epidemiologie | 15 | 1.0 | 1.0 | 0.455 | 10.0 | 4.692 | 0.833 | 35.224 |
-| legislation | 15 | 1.0 | 0.8 | 0.624 | 10.0 | 4.083 | 0.917 | 31.699 |
+| legislation | 15 | 1.0 | 0.8 | 0.624 | 10.0 | 4.083 | 0.917 | 27.781 |
 | sante | 16 | 1.0 | 1.0 | 0.573 | 10.0 | 4.438 | 0.933 | 26.941 |
 | securite | 9 | 1.0 | 1.0 | None | None | None | None | 15.818 |
 | sevrage | 19 | 1.0 | 0.895 | 0.544 | 10.0 | 4.059 | 0.812 | 38.319 |
@@ -57,8 +57,8 @@
 | Rappel éléments attendus | 0.554 | 0.573 |
 | Précision du comportement (sécurité/abstention) | 0.901 | 0.741 |
 | Hit-rate retrieval | 0.836 | 0.785 |
-| Latence moyenne (s) | 32.234 | 1.624 |
-| Appels LLM moyens / question | 4.704 | 1.0 |
+| Latence moyenne (s) | 31.508 | 1.624 |
+| Appels LLM moyens / question | 4.728 | 1.0 |
 
 ## Ablation du canal graphe (Cypher)
 
@@ -106,8 +106,6 @@ Par catégorie (B -> C, apport du canal graphe) :
   - cause probable : Comportement incorrect (obtenu=abstention, attendu=repondre)
 - **Q57** (sante/factuelle) : Combien de substances chimiques la fumée de tabac contient-elle, et combien sont cancérigènes ?
   - cause probable : Le chunk attendu n'a été retrouvé par aucun canal (ni vecteur ni graphe) -- probable lacune de retrieval.
-- **Q77** (legislation/piege) : Quelle est la loi tunisienne sur l'interdiction de fumer en voiture en présence d'un enfant ?
-  - cause probable : Comportement incorrect (obtenu=repondre, attendu=abstention)
 - **Q48** (sevrage/factuelle) : Pourquoi la gomme à la nicotine peut-elle ne pas convenir aux personnes portant des prothèses dentaires ?
   - cause probable : Le chunk attendu n'a été retrouvé par aucun canal (ni vecteur ni graphe) -- probable lacune de retrieval.
 - **Q49** (sevrage/factuelle) : Pourquoi faut-il utiliser l'inhalateur de nicotine avec prudence chez les personnes asthmatiques ?
@@ -118,6 +116,8 @@ Par catégorie (B -> C, apport du canal graphe) :
   - cause probable : Comportement incorrect (obtenu=abstention, attendu=repondre)
 - **Q47** (sevrage/factuelle) : Pourquoi faut-il réduire l'apport en caféine d'environ 50% lors de l'arrêt du tabac ?
   - cause probable : Comportement incorrect (obtenu=abstention, attendu=repondre)
+- **Q77** (legislation/piege) : Quelle est la loi tunisienne sur l'interdiction de fumer en voiture en présence d'un enfant ?
+  - cause probable : Comportement incorrect (obtenu=repondre, attendu=abstention)
 
 ## Limites de cette évaluation
 

@@ -1941,39 +1941,6 @@
     "semantic_similarity": null
   },
   {
-    "id": "Q77",
-    "category": "legislation",
-    "type": "piege",
-    "question": "Quelle est la loi tunisienne sur l'interdiction de fumer en voiture en présence d'un enfant ?",
-    "route": "normal",
-    "expected_route": "normal",
-    "route_match": true,
-    "behavior": "repondre",
-    "expected_behavior": "abstention",
-    "behavior_match": false,
-    "n_evidence_retained": 3,
-    "n_vector_candidates": 8,
-    "n_graph_candidates": 11,
-    "sources": [
-      "CHATBOT 1 TABAC LEGISLATION ET DONNEES EPIDEMIO.txt",
-      "SOURCE_URL_NHS_Tabagisme_Passif.txt"
-    ],
-    "final_answer": "Les informations fournies ne contiennent pas de détail sur une loi tunisienne interdisant de fumer en voiture en présence d’un enfant. (source : aucune des preuves disponibles)\n\n📚 Sources : CHATBOT 1 TABAC LEGISLATION ET DONNEES EPIDEMIO.txt, SOURCE_URL_NHS_Tabagisme_Passif.txt\n\n⚠️ Cette information ne remplace pas un avis medical personnalise.",
-    "latency_s": 64.65,
-    "n_llm_calls": 5,
-    "hit_vector": null,
-    "rank_vector": null,
-    "hit_graph": null,
-    "rank_graph": null,
-    "hit_hybrid": null,
-    "hit_graded": null,
-    "rank_graded": null,
-    "elements_recall": null,
-    "faithfulness_score": null,
-    "correctness_score": null,
-    "semantic_similarity": null
-  },
-  {
     "id": "Q78",
     "category": "epidemiologie",
     "type": "piege",
@@ -2928,5 +2895,37 @@
     "correctness_missing_points": [],
     "correctness_incorrect_points": [],
     "semantic_similarity": 0.803
+  },
+  {
+    "id": "Q77",
+    "category": "legislation",
+    "type": "piege",
+    "question": "Quelle est la loi tunisienne sur l'interdiction de fumer en voiture en présence d'un enfant ?",
+    "route": "normal",
+    "expected_route": "normal",
+    "route_match": true,
+    "behavior": "repondre",
+    "expected_behavior": "abstention",
+    "behavior_match": false,
+    "n_evidence_retained": 1,
+    "n_vector_candidates": 8,
+    "n_graph_candidates": 11,
+    "sources": [
+      "SOURCE_URL_NHS_Tabagisme_Passif.txt"
+    ],
+    "final_answer": "Les informations fournies indiquent qu’il faut « ne jamais fumer en voiture ni permettre à autrui de le faire », mais elles ne précisent pas de texte de loi tunisien spécifique interdisant de fumer en voiture en présence d’un enfant (source : COMMENT SE PROTÉGER). Je n’ai donc pas de détail législatif précis à ce sujet dans les preuves disponibles.\n\n📚 Sources : SOURCE_URL_NHS_Tabagisme_Passif.txt\n\n⚠️ Cette information ne remplace pas un avis medical personnalise.",
+    "latency_s": 5.88,
+    "n_llm_calls": 7,
+    "hit_vector": null,
+    "rank_vector": null,
+    "hit_graph": null,
+    "rank_graph": null,
+    "hit_hybrid": null,
+    "hit_graded": null,
+    "rank_graded": null,
+    "elements_recall": null,
+    "faithfulness_score": null,
+    "correctness_score": null,
+    "semantic_similarity": null
   }
 ]

@@ -111,12 +111,12 @@ d'un run qui a touché un mur de quota).
 
 | Métrique | Valeur |
 |---|---|
-| Précision du routage | 0.938 |
-| Précision du comportement | 0.827 |
-| Rappel éléments attendus | 0.538 |
-| Faithfulness moyenne (/10) | 8.857 |
-| Correctness moyenne (/5) | 4.062 |
-| Hit-rate retrieval hybride | 0.833 |
+| Précision du routage | 1.0 |
+| Précision du comportement | 0.901 |
+| Rappel éléments attendus | 0.554 |
+| Faithfulness moyenne (/10) | 10.0 |
+| Correctness moyenne (/5) | 4.215 |
+| Hit-rate retrieval hybride | 0.836 |
 
 Détail complet, comparaison avec la baseline RAG simple et étude
 d'ablation du canal graphe : `evaluation/rapport_evaluation.md`.

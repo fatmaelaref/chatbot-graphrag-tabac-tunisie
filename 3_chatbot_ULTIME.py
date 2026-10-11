@@ -1141,7 +1141,13 @@ def _audit_once(evidence_text: str, draft: str) -> Optional[dict]:
 
 _NO_INFO_PATTERNS = re.compile(
     r"pas d'information|pas de donn[ée]es|ne mentionnent pas|ne sont pas couvert|"
-    r"ne couvrent pas|n'ai pas trouv[ée]|preuves? (disponibles?|fournies?) ne",
+    r"ne couvrent pas|n'ai pas trouv[ée]|"
+    # Variante trouvee le 2026-10-11 (Q77 du jeu d'eval) : le LLM dit parfois
+    # "informations fournies" au lieu de "preuves fournies" -- le regex ne
+    # couvrait que ce 2e mot, ratant une vraie auto-abstention (consequence :
+    # mal classee "repondre" au lieu de "abstention" cote evaluation, ET le
+    # groundedness-skip de _is_self_declared_no_info ne s'appliquait pas).
+    r"(preuves?|informations?|[ée]l[ée]ments?) (disponibles?|fournies?) ne",
     re.IGNORECASE,
 )
 
