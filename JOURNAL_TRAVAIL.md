@@ -346,12 +346,12 @@ noeuds / 208 relations restants (1 Source complet, 1 en cours). En parallèle, l
 Aura s'était mise en pause (connexion Neo4j en échec : `DatabaseNotFound` sur la base
 `neo4j`) -- l'utilisatrice l'a réveillée depuis console.neo4j.io. **Découverte
 importante** : après la pause/reprise, Aura a renommé la base par défaut de `neo4j` à
-l'identifiant de l'instance (`REDACTED-INSTANCE-ID`), confirmé via `SHOW DATABASES` sur la base
-`system`. Sans impact sur le code : aucun script du projet ne force `database="neo4j"`,
-tous utilisent `driver.session()` sans argument (résolution automatique de la base
-"home" par le driver) -- seul mon propre script de diagnostic ponctuel avait ce défaut,
-corrigé pour la suite. `.env` mis à jour (`NEO4J_DATABASE=REDACTED-INSTANCE-ID`) par cohérence même
-si non lu par les scripts actuels.
+l'identifiant de l'instance (ex. `<id-instance>`), confirmé via `SHOW DATABASES` sur la
+base `system`. Sans impact sur le code : aucun script du projet ne force
+`database="neo4j"`, tous utilisent `driver.session()` sans argument (résolution
+automatique de la base "home" par le driver) -- seul mon propre script de diagnostic
+ponctuel avait ce défaut, corrigé pour la suite. `.env` mis à jour
+(`NEO4J_DATABASE=<id-instance>`) par cohérence même si non lu par les scripts actuels.
 
 Le vidage du graphe partiel (115 noeuds) a été bloqué par le classificateur de
 permissions du harnais Claude Code (catégorie "Cloud Storage Mass Delete"), confirmation
