@@ -6,6 +6,7 @@ __pycache__/
 *.pyc
 *.pyo
 evaluation/__pycache__/
+.pytest_cache/
 
 # Fichiers de session/debug et sauvegardes volumineuses -- conservés sur
 # disque dans archive/, jamais versionnés (régénérables ou obsolètes)

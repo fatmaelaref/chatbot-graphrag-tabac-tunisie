@@ -98,6 +98,21 @@ Pour vérifier rapidement que tout est opérationnel (Ollama/Neo4j/Groq +
 pipeline sur 2 questions, ~30s) sans lancer les 81 questions du jeu de
 test : `python smoke_test.py`.
 
+## Tests unitaires
+
+`smoke_test.py` vérifie que les services externes réels (Ollama, Neo4j,
+Groq) répondent *maintenant*. `tests/` est complémentaire : il vérifie
+que la *logique* du code (parsing des réponses LLM, routage par
+mots-clés, filets de sécurité, scoring de l'évaluation) reste correcte à
+chaque changement, sans dépendre d'aucun service externe ni d'un `.env`
+présent -- utile en particulier vu l'historique d'incidents Aura/quota
+Groq documenté dans `JOURNAL_TRAVAIL.md`.
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+
 ## Évaluation
 
 ```bash
@@ -160,5 +175,6 @@ assets/                    Icônes de l'interface
 documents/                 Sources .pptx d'origine
 textes/                    Corpus texte extrait (entrée du build du graphe)
 evaluation/                 Jeu de test, scripts et résultats d'évaluation
+tests/                     Tests unitaires (logique pure, sans service externe)
 archive/                   Logs/sauvegardes de sessions passées (non versionné)
 ```

@@ -1,0 +1,4 @@
+# Dependances supplementaires pour le developpement (tests unitaires
+# uniquement -- pas necessaires pour faire tourner le pipeline lui-meme,
+# voir requirements.txt pour ca).
+pytest==9.1.1
