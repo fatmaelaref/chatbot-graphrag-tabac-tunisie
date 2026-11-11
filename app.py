@@ -77,24 +77,28 @@ def render_source_cards(filenames: list[str]) -> None:
         organization = meta.get("organization") or ""
         url = meta.get("url")
         initial = (organization or display_name).strip()[:1].upper() or "?"
+        # Couleurs theme-safe : teinte neutre semi-transparente (visible sur
+        # fond clair ET sombre) plutot que des hex clairs fixes ; le texte
+        # n'impose pas de couleur (herite celle du theme actif), seule
+        # l'opacite distingue le sous-titre -- fonctionne dans les deux themes.
         inner = f"""
           <div style="display:flex;align-items:center;gap:0.5rem;
-                      border:1px solid #D7E0EC;border-radius:10px;
-                      padding:0.5rem 0.75rem;background:#F7FAFD;max-width:260px;">
+                      border:1px solid rgba(128,128,128,0.35);border-radius:10px;
+                      padding:0.5rem 0.75rem;background:rgba(128,128,128,0.08);max-width:260px;">
             <div style="flex-shrink:0;width:28px;height:28px;border-radius:50%;
-                        background:#1F3864;color:white;display:flex;
+                        background:#eb6834;color:white;display:flex;
                         align-items:center;justify-content:center;
                         font-weight:700;font-size:0.85rem;">{initial}</div>
             <div style="line-height:1.2;">
-              <div style="font-size:0.85rem;font-weight:600;color:#1A1A1A;">{display_name}</div>
-              {f'<div style="font-size:0.72rem;color:#5A6B82;">{organization}</div>' if organization else ''}
+              <div style="font-size:0.85rem;font-weight:600;">{display_name}</div>
+              {f'<div style="font-size:0.72rem;opacity:0.65;">{organization}</div>' if organization else ''}
             </div>
           </div>
         """
         if url:
             cards_html.append(
                 f'<a href="{url}" target="_blank" rel="noopener noreferrer" '
-                f'style="text-decoration:none;">{inner}</a>'
+                f'style="text-decoration:none;color:inherit;">{inner}</a>'
             )
         else:
             cards_html.append(inner)
@@ -113,14 +117,45 @@ st.set_page_config(
 st.markdown(
     """
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+    /* Police moderne -- EXCLUT explicitement les icones Material de Streamlit
+       (ex. le chevron de st.expander) : leur appliquer une police texte casse
+       le rendu de l'icone (elle s'affiche en texte brut
+       "keyboard_arrow_right" au lieu du glyphe). Premier essai (font-family:
+       unset) insuffisant : `unset` reprend la valeur HERITEE du parent, qui
+       est justement 'Inter' a cause de la regle ci-dessous sur `div`/`span`
+       ancetres -- il faut reposer EXPLICITEMENT le nom exact que Streamlit
+       utilise ('Material Symbols Rounded', trouve dans son propre CSS),
+       pas un unset qui remonte la cascade jusqu'a notre propre regle. */
+    html, body, p, span, div, li, label, textarea, button {
+        font-family: 'Inter', sans-serif;
+    }
+    [data-testid="stIconMaterial"] {
+        font-family: 'Material Symbols Rounded' !important;
+    }
+    h1, h2, h3, .stMarkdown h3 { font-family: 'Poppins', sans-serif; }
+
+    /* Cartes de theme et conteneurs bordes -- s'appuie sur le conteneur natif
+       Streamlit (deja theme-aware clair/sombre) plutot que sur des couleurs
+       fixes, pour rester lisible dans les deux themes. */
     div[data-testid="stVerticalBlockBorderWrapper"] {
-        border-radius: 14px;
+        border-radius: 16px;
     }
     .theme-caption {
         text-align: center;
         font-weight: 600;
-        margin-top: 4px;
+        margin-top: 6px;
         font-size: 0.95rem;
+    }
+
+    /* Reponse mise en valeur : le conteneur natif st.container(border=True)
+       qui l'entoure (classe answer-box) recoit un accent colore en haut --
+       fonctionne en theme clair ET sombre (le conteneur natif gere deja le
+       fond/la bordure de base, on ajoute juste un liseré). */
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.answer-box-marker) {
+        border-top: 4px solid #eb6834;
+        padding-top: 0.3rem;
     }
     </style>
     """,
@@ -209,12 +244,13 @@ st.subheader("1. Choisis un thème")
 cols = st.columns(len(THEMES))
 for col, (key, theme) in zip(cols, THEMES.items()):
     with col:
-        icon_path = ASSETS / theme["icon"]
-        if icon_path.exists():
-            st.image(str(icon_path), width="stretch")
-        st.markdown(f'<div class="theme-caption">{theme["label"]}</div>', unsafe_allow_html=True)
-        if st.button("Voir les exemples", key=f"theme_{key}", width="stretch"):
-            st.session_state.active_theme = key
+        with st.container(border=True):
+            icon_path = ASSETS / theme["icon"]
+            if icon_path.exists():
+                st.image(str(icon_path), width="stretch")
+            st.markdown(f'<div class="theme-caption">{theme["label"]}</div>', unsafe_allow_html=True)
+            if st.button("Exemples", key=f"theme_{key}", width="stretch"):
+                st.session_state.active_theme = key
 
 if st.session_state.active_theme:
     theme = THEMES[st.session_state.active_theme]
@@ -298,10 +334,13 @@ if st.session_state.last_result:
     r = st.session_state.last_result
     with response_area.container():
         st.success(f"Réponse obtenue en {r['duree']:.0f} secondes")
-        st.markdown("### 💬 Réponse")
-        st.write(_SOURCES_LINE_RE.sub("", r["answer_text"]))
 
-        render_source_cards(r["sources"])
+        with st.container(border=True):
+            st.markdown('<span class="answer-box-marker"></span>', unsafe_allow_html=True)
+            st.markdown("### 💬 Réponse")
+            st.write(_SOURCES_LINE_RE.sub("", r["answer_text"]))
+
+            render_source_cards(r["sources"])
 
         with st.expander("🔧 Voir le détail du pipeline (routage, recherche, notation, vérification)"):
             st.code(r["log"] or "(aucun log -- réponse cadrée sans retrieval)", language=None)
