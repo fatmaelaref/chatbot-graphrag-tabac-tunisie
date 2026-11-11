@@ -12,6 +12,14 @@ evaluation/__pycache__/
 # disque dans archive/, jamais versionnés (régénérables ou obsolètes)
 archive/
 
+# Sauvegardes du graphe Neo4j produites par scripts/backup_graph.py et
+# scripts/wipe_graph.py (nodes.json/relationships.json, plusieurs Mo) --
+# volumineuses et régénérables à tout moment depuis le graphe vivant,
+# jamais versionnées (archiver manuellement dans archive/ si besoin de les
+# garder, comme pour les sauvegardes des sessions precedentes). Couvre a la
+# fois backup_AAAAMMJJ/ et backup_wipe_AAAAMMJJ_HHMMSS/.
+backup_*/
+
 # Checkpoint de reprise d'evaluate.py -- transitoire, pas un résultat final
 evaluation/resultats_partial.json
 

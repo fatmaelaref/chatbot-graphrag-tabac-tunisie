@@ -2,7 +2,7 @@
 
 - **Date d'exécution** : 20261011
 - **Jeu de test** : evaluation/gold_eval_set.json (81 questions)
-- **Pipeline évalué** : 3_chatbot_ULTIME.py (build_graph(), pipeline complet)
+- **Pipeline évalué** : chatbot_pipeline.py (build_graph(), pipeline complet)
 - **Juge LLM** : openai/gpt-oss-20b (Groq, CONTROL_MODEL) -- différent de GENERATION_MODEL (gpt-oss-120b) qui génère les réponses
 
 ## Résultats globaux

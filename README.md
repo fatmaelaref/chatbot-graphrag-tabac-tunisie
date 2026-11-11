@@ -144,6 +144,19 @@ et comment les diagnostiquer : toujours vérifier `correctness_score`/
 `faithfulness_score` non-`None` avant de faire confiance aux chiffres
 d'un run qui a touché un mur de quota).
 
+Pour régénérer uniquement `rapport_evaluation.md` (+ le graphique) à partir
+d'un résultat officiel déjà versionné, sans dépendre de `resultats_partial.json`
+(local, non versionné, absent d'un clone frais) ni avoir besoin d'un accès à
+Neo4j/Groq/Ollama (le chargement du pipeline est différé et jamais déclenché
+dans ce mode) :
+
+```bash
+python evaluate.py --finalize-only --from resultats_20261011.json
+```
+
+`--from` accepte aussi un chemin relatif à `evaluation/`, par exemple
+`--from historique/resultats_20261009.json`.
+
 ### Résultats clés (run du 2026-10-11, 81/81)
 
 | Métrique | Valeur |
