@@ -3,11 +3,13 @@
 SCRIPT 2 : CONSTRUIRE LE KNOWLEDGE GRAPH - PROJET TABAC
 ============================================================
 Le splitter, le schema et le prompt sont definis dans kg_config.py
-(modifie-les la-bas, pas ici).
+(modifie-les la-bas, pas ici). Le LLM/embedder, le pipeline SimpleKGPipeline
+et le post-traitement (fusion de doublons, filet Source->Citation) sont
+partages avec reprocess_files.py via kg_pipeline_common.py.
 """
 import logging
-logging.basicConfig(level=logging.DEBUG)
-logging.getLogger("neo4j_graphrag").setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
+logging.getLogger("neo4j_graphrag").setLevel(logging.INFO)
 
 import os
 import sys
@@ -27,42 +29,18 @@ import glob
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
 
-from neo4j_graphrag.embeddings import OllamaEmbeddings
-from neo4j_graphrag.experimental.pipeline.kg_builder import SimpleKGPipeline
-from neo4j_graphrag.experimental.components.types import LexicalGraphConfig
-
-from kg_config import (
-    text_splitter,
-    NODE_TYPES,
-    RELATIONSHIP_TYPES,
-    prompt_template,
-    FixedOllamaLLM,
-    OLLAMA_JSON_SCHEMA,
+from kg_pipeline_common import (
+    LLM_MODEL_NAME,
+    build_llm_and_embedder,
+    build_kg_pipeline,
+    merge_case_insensitive_duplicates,
+    relabel_source_without_path_as_citation,
 )
 
 load_dotenv()
 
 # ============================================================
-# 1. LEXICAL GRAPH CONFIG
-# ============================================================
-
-lexical_config = LexicalGraphConfig(
-    chunk_node_label="Article",
-    document_node_label="Source",
-    chunk_to_document_relationship_type="DANS_SOURCE",
-    next_chunk_relationship_type="ARTICLE_SUIVANT",
-    node_to_chunk_relationship_type="DANS_ARTICLE",
-    chunk_embedding_property="vecteur",
-)
-
-# ============================================================
-# 2. CHOIX DU MODELE
-# ============================================================
-
-LLM_MODEL_NAME = "qwen2.5:7b"
-
-# ============================================================
-# 3. CONNEXION AUX SERVICES
+# CONNEXION AUX SERVICES
 # ============================================================
 
 print("=" * 60)
@@ -90,23 +68,8 @@ except Exception as e:
     sys.exit(1)
 
 try:
-    llm = FixedOllamaLLM(
-        model_name=LLM_MODEL_NAME,
-        model_params={
-            "options": {
-                "temperature": 0.0,
-                "num_ctx": 8192,      # fenetre de contexte suffisante pour le prompt many-shot
-                "num_predict": 2048,  # PLAFOND de generation par chunk : evite qu'un chunk
-                                      # ambigu ne fasse partir le modele dans une reponse
-                                      # interminable (protection contre le "chaos"/gaspillage
-                                      # de tokens evoque plus tot dans la conversation)
-            },
-            "format": OLLAMA_JSON_SCHEMA,  # contraint reellement la sortie JSON d'Ollama
-        },
-    )
+    llm, embedder = build_llm_and_embedder()
     print(f"✅ LLM Ollama ({LLM_MODEL_NAME}) chargé")
-
-    embedder = OllamaEmbeddings(model="nomic-embed-text")
     print("✅ Embedder (nomic-embed-text) chargé")
 except Exception as e:
     print(f"❌ Impossible de charger les modeles Ollama : {e}")
@@ -116,34 +79,21 @@ except Exception as e:
     sys.exit(1)
 
 # ============================================================
-# 4. CREER LE PIPELINE
+# CREER LE PIPELINE
 # ============================================================
 
-kg_builder = SimpleKGPipeline(
-    llm=llm,
-    driver=neo4j_driver,
-    neo4j_database=None,
-    embedder=embedder,
-    from_pdf=False,
-    lexical_graph_config=lexical_config,
-    text_splitter=text_splitter,
-    prompt_template=prompt_template,
-    schema={
-        "node_types": NODE_TYPES,
-        "relationship_types": RELATIONSHIP_TYPES,
-    },
-)
+kg_builder = build_kg_pipeline(neo4j_driver, llm, embedder)
 print("✅ Pipeline SimpleKG configuré")
 
 # ============================================================
-# 5. TRAITER TOUS LES DOCUMENTS (.txt deja extraits par script 1)
+# TRAITER TOUS LES DOCUMENTS (.txt deja extraits par extract_documents.py)
 # ============================================================
 
 async def process_all_documents():
     # .replace("\\", "/") : sur Windows, glob.glob() renvoie des chemins avec
     # antislash ("./textes\\Fichier.txt"). Ce chemin sert de CLE D'UNICITE pour
     # le noeud Source (contrainte source_path) -- si un autre script (ex.
-    # retraiter_fichiers.py) ou un run ulterieur compare/ecrit ce meme fichier
+    # reprocess_files.py) ou un run ulterieur compare/ecrit ce meme fichier
     # avec des slashs normaux, il ne retrouve pas le noeud existant et en CREE
     # un deuxieme (constate en pratique le 2026-10-07 : 2 fichiers dupliques
     # en Source+Article apres un retraitement cible). On normalise ici une
@@ -152,7 +102,7 @@ async def process_all_documents():
 
     if not text_files:
         print("\n❌ Aucun fichier .txt trouvé dans ./textes/")
-        print("   Verifie que le dossier existe et que le script 1 a bien été lancé avant.")
+        print("   Verifie que le dossier existe et que extract_documents.py a bien été lancé avant.")
         return 0, []
 
     print(f"\n📄 {len(text_files)} fichier(s) texte trouvé(s)")
@@ -188,85 +138,33 @@ if failed_files:
     print(f"\n⚠️ {len(failed_files)} fichier(s) ont échoué et n'ont PAS été ajoutés au graphe :")
     for f in failed_files:
         print(f"   - {f}")
-    print("   Tu peux relancer le script : les fichiers déjà traités avec succès")
-    print("   seront retraités aussi (pas de doublons grâce au MERGE, mais ça prend du temps).")
+    print("   ATTENTION avant de relancer ce script : le writer de neo4j_graphrag fait un")
+    print("   CREATE (pas un MERGE) sur le noeud Source a chaque run -- relancer tel quel")
+    print("   dupliquerait les fichiers déjà traités avec succès. Utilise plutot")
+    print("   reprocess_files.py (qui nettoie l'ancien noeud Source avant de retraiter)")
+    print("   pour ne cibler que les fichiers en échec, ou vide le graphe avant de relancer")
+    print("   ce script en entier (voir scripts/wipe_graph.py).")
 
 # ============================================================
-# 5bis. FUSION AUTOMATIQUE PAR CASSE ET PAR ACCENTS (post-traitement deterministe)
+# FUSION DES DOUBLONS + FILET DE SECURITE (post-traitement partage,
+# voir kg_pipeline_common.py pour le detail de chaque requete)
 # ============================================================
-# Le resolver natif (SinglePropertyExactMatchResolver) compare les noms de
-# facon SENSIBLE A LA CASSE : "Patch a la Nicotine" et "Patch a la nicotine"
-# restent deux noeuds distincts a ses yeux, meme si le prompt demande un nom
-# canonique -- un LLM ne peut pas garantir une casse identique a 100% sur
-# des dizaines d'appels independants. Ce correctif fusionne, APRES coup,
-# tout groupe de noeuds (type + nom en minuscules identiques) en un seul --
-# y compris a travers des types differents (ex: "Diabete de type 2" en
-# Pathologie ET en Concept se retrouvent fusionnes en un seul noeud portant
-# les deux etiquettes). Decouvert et applique manuellement le 05/09/2026 ;
-# desormais automatique a chaque reconstruction.
-#
-# Etendu le 2026-10-07 : la cle de regroupement utilisait toLower() seul, qui
-# NE RETIRE PAS LES ACCENTS -- "Etats-unis" et "États-Unis" restaient deux
-# noeuds Pays distincts (verifie sur le graphe live : 20 groupes de doublons
-# purement accentuels, ex. Pays, Produit, Symptome, Concept, Loi). On bascule
-# sur apoc.text.clean() (accents + casse + ponctuation normalises) pour la cle
-# de regroupement, et on priorise le nom AVEC accents comme nom survivant
-# (ORDER BY ... quality DESC avant le collect -- apoc.refactor.mergeNodes
-# garde les proprietes du premier noeud de la liste avec properties:'discard').
 print("\n" + "=" * 60)
 print("FUSION AUTOMATIQUE DES DOUBLONS DE CASSE ET D'ACCENTS")
 print("=" * 60)
+nb = merge_case_insensitive_duplicates(neo4j_driver)
+if nb >= 0:
+    print(f"   ✅ {nb} groupe(s) de doublons fusionnés (casse/accents/type)")
 
-merge_case_insensitive_query = """
-MATCH (e:__Entity__)
-WITH e, apoc.text.clean(e.name) AS cle,
-     CASE WHEN e.name =~ '.*[àâäéèêëîïôöùûüçÀÂÄÉÈÊËÎÏÔÖÙÛÜÇ].*' THEN 1 ELSE 0 END AS quality
-WHERE cle IS NOT NULL AND cle <> ''
-ORDER BY cle, quality DESC
-WITH cle, collect(e) AS noeuds
-WHERE size(noeuds) > 1
-CALL apoc.refactor.mergeNodes(noeuds, {properties: 'discard', mergeRels: true}) YIELD node
-RETURN count(node) AS nb_fusionnes
-"""
-try:
-    merge_result = neo4j_driver.execute_query(merge_case_insensitive_query)
-    nb = merge_result.records[0]["nb_fusionnes"] if merge_result.records else 0
-    print(f"   ✅ {nb} groupe(s) de doublons fusionnés (casse/type)")
-except Exception as e:
-    print(f"   ⚠️ Erreur pendant la fusion automatique : {e}")
-    print("   Tu peux relancer manuellement cette requête dans Neo4j Browser si besoin.")
-
-# ============================================================
-# 5ter. FILET DE SECURITE : collision de label avec "Source"
-# ============================================================
-# Constate en pratique le 2026-10-07 : le JSON `format` impose a Ollama ne
-# contraint QUE la structure (id/label/properties), pas les valeurs de
-# `label` elles-memes (pas d'enum) -- malgre un schema NODE_TYPES qui ne
-# definit pas de label "Source" et malgre additional_node_types=False cote
-# GraphSchema, qwen2.5:7b a quand meme produit des noeuds `label: "Source"`
-# pour des references bibliographiques CITEES dans le texte (ex: "WHO Report
-# on the Global Tobacco Epidemic 2008"), en collision avec le noeud Source
-# du framework lexical graph (qui, lui, porte toujours une propriete `path`).
-# On a ajoute un label "Citation" dedie dans kg_config.py pour la prochaine
-# extraction, mais ce filet de securite corrige aussi, de façon deterministe,
-# tout noeud `Source` sans `path` qui serait quand meme produit.
 print("\n" + "=" * 60)
 print("FILET DE SECURITE : Source sans path -> Citation")
 print("=" * 60)
-try:
-    relabel_result = neo4j_driver.execute_query("""
-        MATCH (s:Source) WHERE s.path IS NULL
-        REMOVE s:Source
-        SET s:Citation
-        RETURN count(s) AS n
-    """)
-    nb = relabel_result.records[0]["n"] if relabel_result.records else 0
+nb = relabel_source_without_path_as_citation(neo4j_driver)
+if nb >= 0:
     print(f"   ✅ {nb} noeud(s) Source sans path relabelisé(s) en Citation")
-except Exception as e:
-    print(f"   ⚠️ Erreur pendant le relabelling : {e}")
 
 # ============================================================
-# 6. ENRICHISSEMENT VIA sources.csv
+# ENRICHISSEMENT VIA sources.csv
 # ============================================================
 
 print("\n" + "=" * 60)
@@ -305,7 +203,7 @@ else:
                 print(f"   ✅ {record['document']} -> {row['theme']}")
 
 # ============================================================
-# 7. VERIFICATION FINALE
+# VERIFICATION FINALE
 # ============================================================
 
 print("\n" + "=" * 60)

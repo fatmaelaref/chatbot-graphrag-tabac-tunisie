@@ -1,7 +1,7 @@
 """
 Fixtures partagees de la suite de tests unitaires.
 
-Objectif : pouvoir importer 3_chatbot_ULTIME.py et tester ses fonctions
+Objectif : pouvoir importer chatbot_pipeline.py et tester ses fonctions
 PURES (parsing, regex, routage par mots-cles...) sans jamais toucher un
 service externe reel (Neo4j Aura, Groq, Ollama) -- contrairement a
 smoke_test.py, qui lui verifie volontairement les vrais services. Les deux
@@ -9,7 +9,7 @@ sont complementaires : smoke_test.py = "l'environnement reel marche-t-il
 maintenant", ce dossier = "la logique du code est-elle correcte, a chaque
 commit, sans dependre d'Aura/Groq/Ollama disponibles ou d'un .env present".
 
-Le module 3_chatbot_ULTIME.py construit un VectorCypherRetriever au niveau
+Le module chatbot_pipeline.py construit un VectorCypherRetriever au niveau
 module (ligne ~194), dont le constructeur interroge reellement Neo4j
 (`SHOW VECTOR INDEXES`, voir neo4j_graphrag.retrievers.base.Retriever.
 _fetch_index_infos) -- verifie en inspectant le code source de la lib.
@@ -49,7 +49,7 @@ class _StubRetriever:
 
 @pytest.fixture(scope="session")
 def chatbot():
-    """Charge 3_chatbot_ULTIME.py une seule fois pour toute la session de
+    """Charge chatbot_pipeline.py une seule fois pour toute la session de
     test, avec Neo4j/Groq neutralises au moment de l'import."""
     import os
     import neo4j
@@ -69,7 +69,7 @@ def chatbot():
     neo4j.GraphDatabase.driver = staticmethod(lambda *a, **kw: MagicMock(name="fake_neo4j_driver"))
     retrievers_module.VectorCypherRetriever = _StubRetriever
 
-    module_path = PROJECT_DIR / "3_chatbot_ULTIME.py"
+    module_path = PROJECT_DIR / "chatbot_pipeline.py"
     spec = importlib.util.spec_from_file_location("chatbot_ultime", module_path)
     module = importlib.util.module_from_spec(spec)
     sys.modules["chatbot_ultime"] = module

@@ -6,15 +6,15 @@ Developpement d'un ChatBot sur le tabagisme en Tunisie:
 legislation, sevrage tabagique, epidemiologie, effets sur la sante.
 
 Ce fichier NE DUPLIQUE PAS la logique du pipeline : il importe et
-reutilise directement 3_chatbot_ULTIME.py (routage, recherche hybride,
+reutilise directement chatbot_pipeline.py (routage, recherche hybride,
 grading, generation, verification de groundedness). Si tu modifies le
 pipeline plus tard, cette interface suit automatiquement -- rien a
 recopier ici.
 
 Prerequis (dossier "assets" avec les 6 images a cote de ce fichier) :
     mon_projet_tabac/
-        3_chatbot_ULTIME.py
-        app_streamlit.py       <- ce fichier
+        chatbot_pipeline.py
+        app.py                 <- ce fichier
         assets/
             banner.png
             icon_legislation.png
@@ -25,7 +25,7 @@ Prerequis (dossier "assets" avec les 6 images a cote de ce fichier) :
 
 Lancement :
     pip install streamlit
-    streamlit run app_streamlit.py
+    streamlit run app.py
 """
 
 import time
@@ -44,7 +44,7 @@ ASSETS = BASE_DIR / "assets"
 # ============================================================
 @st.cache_resource(show_spinner="Chargement du pipeline (connexion Neo4j + Groq)...")
 def load_pipeline():
-    module_path = BASE_DIR / "3_chatbot_ULTIME.py"
+    module_path = BASE_DIR / "chatbot_pipeline.py"
     spec = importlib.util.spec_from_file_location("chatbot_core", module_path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -81,7 +81,7 @@ st.markdown(
 
 banner_path = ASSETS / "banner.png"
 if banner_path.exists():
-    st.image(str(banner_path), use_container_width=True)
+    st.image(str(banner_path), width="stretch")
 
 st.title("🚭 Chatbot sur le tabagisme en Tunisie")
 st.caption(
@@ -163,9 +163,9 @@ for col, (key, theme) in zip(cols, THEMES.items()):
     with col:
         icon_path = ASSETS / theme["icon"]
         if icon_path.exists():
-            st.image(str(icon_path), use_container_width=True)
+            st.image(str(icon_path), width="stretch")
         st.markdown(f'<div class="theme-caption">{theme["label"]}</div>', unsafe_allow_html=True)
-        if st.button("Voir les exemples", key=f"theme_{key}", use_container_width=True):
+        if st.button("Voir les exemples", key=f"theme_{key}", width="stretch"):
             st.session_state.active_theme = key
 
 if st.session_state.active_theme:
@@ -173,7 +173,7 @@ if st.session_state.active_theme:
     st.markdown(f"**Exemples de questions — {theme['label']}**")
     with st.container(border=True):
         for q in theme["questions"]:
-            if st.button(q, key=f"ex_{q}", use_container_width=True):
+            if st.button(q, key=f"ex_{q}", width="stretch"):
                 st.session_state.selected_question = q
 
 st.divider()
@@ -190,7 +190,7 @@ question = st.text_area(
     label_visibility="collapsed",
 )
 
-lancer = st.button("🔍 Poser la question", type="primary", use_container_width=True)
+lancer = st.button("🔍 Poser la question", type="primary", width="stretch")
 
 if lancer and question.strip():
     log_buffer = io.StringIO()

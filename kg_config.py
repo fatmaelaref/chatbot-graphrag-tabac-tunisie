@@ -3,7 +3,8 @@
 kg_config.py -- Configuration PARTAGEE du Knowledge Graph
 ============================================================
 Ce module contient le splitter, le schema et le prompt utilises
-par 2_build_kg_ULTIME.py. Modifie-les ICI uniquement.
+par build_knowledge_graph.py et reprocess_files.py (via kg_pipeline_common.py).
+Modifie-les ICI uniquement.
 
 Schema audite le 23/08/2026 contre les 10 documents reels du
 corpus (4 PPTX + guide Quit + 5 fiches OMS/CDC/NHSx2/SPF).
@@ -224,7 +225,7 @@ class HybridSplitter(TextSplitter):
 text_splitter = HybridSplitter()
 
 # ============================================================
-# 2. SCHEMA PERSONNALISE -- 16 types de noeuds, audites contre
+# 2. SCHEMA PERSONNALISE -- 18 types de noeuds, audites contre
 #    les 10 documents reels du corpus (voir commentaire en tete
 #    de fichier). Chaque description contient un exemple concret.
 # ============================================================

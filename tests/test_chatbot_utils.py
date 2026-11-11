@@ -1,5 +1,5 @@
 """
-Tests unitaires de la logique pure de 3_chatbot_ULTIME.py (parsing,
+Tests unitaires de la logique pure de chatbot_pipeline.py (parsing,
 regex, routage par mots-cles, filets de securite) -- par opposition a
 smoke_test.py, qui verifie que les services externes reels repondent.
 Aucun appel reseau ici (voir tests/conftest.py pour comment l'import du
@@ -21,7 +21,7 @@ def test_clean_chunk_removes_slide_markers(chatbot):
 def test_clean_chunk_preserves_line_breaks(chatbot):
     # Regression : aplatir les retours a la ligne detruit les tableaux
     # markdown (dosages patch/gomme melanges) -- voir docstring de
-    # clean_chunk dans 3_chatbot_ULTIME.py.
+    # clean_chunk dans chatbot_pipeline.py.
     text = "Patch : 21mg\nGomme : 4mg"
     result = chatbot.clean_chunk(text)
     assert "\n" in result

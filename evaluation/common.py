@@ -2,7 +2,7 @@
 ============================================================
 common.py -- utilitaires partages par evaluate.py et baseline.py
 ============================================================
-Rien ici ne doit dependre de 3_chatbot_ULTIME.py (pour que baseline.py reste
+Rien ici ne doit dependre de chatbot_pipeline.py (pour que baseline.py reste
 independant du pipeline qu'il sert a comparer) -- uniquement des fonctions
 pures de scoring/normalisation et de generation de rapport.
 """

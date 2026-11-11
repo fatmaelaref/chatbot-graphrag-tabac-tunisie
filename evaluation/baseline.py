@@ -3,7 +3,7 @@
 baseline.py -- RAG SIMPLE DE COMPARAISON (sans routage/grading/groundedness)
 PROJET TABAC TUNISIE
 ============================================================
-Chiffre l'apport reel du pipeline GraphRAG controle (3_chatbot_ULTIME.py) en
+Chiffre l'apport reel du pipeline GraphRAG controle (chatbot_pipeline.py) en
 le comparant a la version "RAG naif" la plus courante : recherche vectorielle
 seule (meme index Neo4j, meme embedder), UN SEUL appel LLM de generation,
 AUCUN routage de securite, AUCUN grading des preuves, AUCUNE verification de
@@ -31,7 +31,7 @@ sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 EVAL_DIR = Path(__file__).parent
 PROJECT_DIR = EVAL_DIR.parent
 GOLD_SET_PATH = EVAL_DIR / "gold_eval_set.json"
-CHATBOT_MODULE_PATH = PROJECT_DIR / "3_chatbot_ULTIME.py"
+CHATBOT_MODULE_PATH = PROJECT_DIR / "chatbot_pipeline.py"
 
 sys.path.insert(0, str(EVAL_DIR))
 from common import normalize, element_recall, retrieval_hit, infer_behavior, avg, median
@@ -111,14 +111,14 @@ def judge_faithfulness(answer, evidence_items):
     evidence_text = "\n\n".join(
         chatbot.clean_chunk(c["text"])[:chatbot.GROUNDEDNESS_TRUNCATE_CHARS] for c in evidence_items
     )
-    result = chatbot.call_ollama_json(chatbot.CONTROL_MODEL, FAITHFULNESS_SYSTEM,
+    result = chatbot.call_llm_json(chatbot.CONTROL_MODEL, FAITHFULNESS_SYSTEM,
                                        f"Preuves :\n{evidence_text}\n\nReponse a evaluer :\n{answer}",
                                        FAITHFULNESS_SCHEMA)
     return result or {"score": None}
 
 
 def judge_correctness(answer, reference, question):
-    result = chatbot.call_ollama_json(
+    result = chatbot.call_llm_json(
         chatbot.CONTROL_MODEL, CORRECTNESS_SYSTEM,
         f"Question : {question}\n\nReponse de reference :\n{reference}\n\nReponse a evaluer :\n{answer}",
         CORRECTNESS_SCHEMA,

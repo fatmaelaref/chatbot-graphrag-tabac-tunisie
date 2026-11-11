@@ -31,16 +31,26 @@ import pdfplumber
 import fitz  # PyMuPDF
 
 import pytesseract
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+from pytesseract import Output
 from PIL import Image
 
 from pptx import Presentation
 from pptx.enum.shapes import MSO_SHAPE_TYPE
 
-import subprocess
-import tempfile
+from dotenv import load_dotenv
 
-SOFFICE_PATH = r"C:\Program Files\LibreOffice\program\soffice.exe"
+PROJECT_DIR = Path(__file__).resolve().parent
+load_dotenv(PROJECT_DIR / ".env")
+
+# Chemins configurables via .env (valeurs par defaut = installation Windows
+# habituelle de ce poste) -- utile si Tesseract/LibreOffice sont installes
+# ailleurs ou sur une autre plateforme.
+pytesseract.pytesseract.tesseract_cmd = os.getenv(
+    "TESSERACT_CMD", r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+)
+SOFFICE_PATH = os.getenv(
+    "SOFFICE_PATH", r"C:\Program Files\LibreOffice\program\soffice.exe"
+)
 # ============================================================
 # CONFIGURATION
 # ============================================================
@@ -273,7 +283,6 @@ def ocr_image(image) -> str:
         print(f"   ⚠️ OCR echoue : {e}")
 
         return ""
-from pytesseract import Output
 
 
 def ocr_image_layout_aware(image) -> str:

@@ -73,7 +73,7 @@ import re
 import copy
 import json
 import unicodedata
-from typing import TypedDict, Literal, Optional
+from typing import TypedDict, Optional
 
 from openai import OpenAI  # utilise aussi pour Groq -- meme librairie, juste une autre adresse
 from dotenv import load_dotenv
@@ -306,11 +306,11 @@ def _to_strict_json_schema(schema: dict) -> dict:
     return schema
 
 
-def call_ollama_json(model: str, system: str, user: str, json_schema: dict) -> Optional[dict]:
+def call_llm_json(model: str, system: str, user: str, json_schema: dict) -> Optional[dict]:
     """
-    Appel Groq contraint en JSON (le nom de la fonction garde "ollama" pour
-    ne pas casser tous les appels existants dans le fichier -- seul
-    l'interieur a change, la logique appelante reste identique).
+    Appel Groq contraint en JSON (routage, reecriture, grading, generation,
+    verification de groundedness -- tous les appels de controle du pipeline
+    passent par cette fonction).
     Retourne None si le parsing echoue -- le noeud appelant DOIT gerer ce
     cas explicitement (fallback prudent), jamais planter la boucle.
 
@@ -478,7 +478,7 @@ Reponds UNIQUEMENT en JSON avec les champs "route" et "reason" (raison courte en
 
 
 def route_query(state: ChatState) -> ChatState:
-    result = call_ollama_json(
+    result = call_llm_json(
         CONTROL_MODEL, ROUTE_SYSTEM, state["question"], ROUTE_SCHEMA
     )
     if result is None:
@@ -492,8 +492,8 @@ def route_query(state: ChatState) -> ChatState:
 
 
 # Filet de securite par REGLES, independant du LLM de routage. Constate en
-# pratique : meme avec un exemple quasi-identique dans le prompt, le LLM
-# local (Mistral, temperature 0) a laisse passer "quel patch je dois
+# pratique : meme avec un exemple quasi-identique dans le prompt, le LLM de
+# controle (CONTROL_MODEL, temperature 0) a laisse passer "quel patch je dois
 # prendre, je suis enceinte de 20 semaines ?" en route "normal" au lieu de
 # "demande_personnelle". Ce filet ne peut JAMAIS assouplir une classification
 # du LLM (ex: repasser "urgence" en "normal") -- il ne fait que la durcir si
@@ -805,11 +805,11 @@ def hybrid_retrieve(state: ChatState) -> ChatState:
 # ============================================================
 # NOTE POUR MONTER EN PRECISION (optionnel) :
 # Cette etape remplace un reranker cross-encoder (type bge-reranker ou
-# Cohere rerank) par un LLM local qui note chaque passage pertinent/non
-# pertinent. C'est le compromis raisonnable pour ta stack 100% locale
-# (Ollama). Si tu veux un vrai reranking base sur des embeddings de
-# cross-encoder (plus rapide et plus stable que demander a un LLM
-# generatif de juger), tu peux ajouter `sentence-transformers` et un
+# Cohere rerank) par un LLM (Groq, CONTROL_MODEL) qui note chaque passage
+# pertinent/non pertinent. C'est le compromis raisonnable sans devoir heberger
+# un modele de reranking dedie. Si tu veux un vrai reranking base sur des
+# embeddings de cross-encoder (plus rapide et plus stable que demander a un
+# LLM generatif de juger), tu peux ajouter `sentence-transformers` et un
 # modele leger type "cross-encoder/ms-marco-MiniLM-L-6-v2" (tourne bien
 # sur CPU) -- ca remplacerait uniquement cette fonction, le reste du
 # graphe ne change pas.
@@ -871,7 +871,7 @@ def grade_evidence(state: ChatState) -> ChatState:
 
     print(f"   ⏳ Grading de {len(all_candidates)} passage(s) en cours (peut prendre "
           f"du temps en local sur CPU)...")
-    result = call_ollama_json(GRADE_MODEL, GRADE_SYSTEM, user_prompt, GRADE_SCHEMA)
+    result = call_llm_json(GRADE_MODEL, GRADE_SYSTEM, user_prompt, GRADE_SCHEMA)
 
     if result is None:
         # Fallback prudent : si le grading echoue techniquement, on NE
@@ -906,7 +906,7 @@ def grade_evidence(state: ChatState) -> ChatState:
     # pertinente doit arriver en PREMIER dans le contexte donne au LLM de
     # generation. Constate en pratique (effet "lost in the middle" bien
     # documente sur les LLM) : une preuve correcte mais en position 5/6
-    # etait ignoree par Mistral au profit d'une reponse d'abstention,
+    # etait ignoree par le LLM de generation au profit d'une reponse d'abstention,
     # alors que la meme preuve en tete de liste aurait probablement ete
     # utilisee.
     graded.sort(key=lambda g: g.get("score", 0), reverse=True)
@@ -1136,7 +1136,7 @@ def _audit_once(evidence_text: str, draft: str) -> Optional[dict]:
     # rajoute AUCUN changement de modele supplementaire (mistral reste charge d'un
     # appel a l'autre) -- juste un seul swap leger->lourd par question, au lieu de
     # plusieurs allers-retours entre modeles differents.
-    return call_ollama_json(GENERATION_MODEL, GROUNDEDNESS_SYSTEM, user_prompt, GROUNDEDNESS_SCHEMA)
+    return call_llm_json(GENERATION_MODEL, GROUNDEDNESS_SYSTEM, user_prompt, GROUNDEDNESS_SCHEMA)
 
 
 _NO_INFO_PATTERNS = re.compile(

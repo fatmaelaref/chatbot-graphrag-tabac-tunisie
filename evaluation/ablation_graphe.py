@@ -3,7 +3,7 @@
 ABLATION_GRAPHE.PY -- mesure l'apport reel du canal graphe (Cypher)
 ============================================================
 Compare 3 configurations sur le MEME jeu de questions, TOUTES avec le code
-ACTUEL de 3_chatbot_ULTIME.py (donc comparables entre elles -- pas de biais
+ACTUEL de chatbot_pipeline.py (donc comparables entre elles -- pas de biais
 du type "une config a le correctif du bug des 700 caracteres, l'autre non") :
   A = RAG simple (vecteur seul, 1 appel LLM, sans notation ni verification)
       -> reutilise le run baseline deja fait (resultats_baseline_*.json) --

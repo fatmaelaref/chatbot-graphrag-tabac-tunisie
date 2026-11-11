@@ -4,7 +4,7 @@ evaluate.py -- EVALUATION DU PIPELINE GRAPHRAG COMPLET
 PROJET TABAC TUNISIE
 ============================================================
 Remplace et etend 4_evaluate_chatbot.py (deplace ici). Fait tourner le
-pipeline LangGraph complet de 3_chatbot_ULTIME.py (routage -> reecriture ->
+pipeline LangGraph complet de chatbot_pipeline.py (routage -> reecriture ->
 recherche hybride -> grading -> generation -> verification groundedness) sur
 gold_eval_set.json et calcule, par question puis agrege par categorie/type :
 
@@ -44,7 +44,7 @@ sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 EVAL_DIR = Path(__file__).parent
 PROJECT_DIR = EVAL_DIR.parent
 GOLD_SET_PATH = EVAL_DIR / "gold_eval_set.json"
-CHATBOT_MODULE_PATH = PROJECT_DIR / "3_chatbot_ULTIME.py"
+CHATBOT_MODULE_PATH = PROJECT_DIR / "chatbot_pipeline.py"
 
 sys.path.insert(0, str(EVAL_DIR))
 from common import (normalize, element_recall, retrieval_hit, infer_behavior,
@@ -52,7 +52,8 @@ from common import (normalize, element_recall, retrieval_hit, infer_behavior,
                      plot_category_scores)
 
 # ============================================================
-# 0. IMPORT DYNAMIQUE DE 3_chatbot_ULTIME.py (nom commence par un chiffre)
+# 0. IMPORT DYNAMIQUE DE chatbot_pipeline.py (vit dans le dossier parent,
+#    pas dans evaluation/ -- pas un package, donc pas importable normalement)
 # ============================================================
 spec = importlib.util.spec_from_file_location("chatbot_ultime", CHATBOT_MODULE_PATH)
 chatbot = importlib.util.module_from_spec(spec)
@@ -65,7 +66,7 @@ print("=" * 60)
 app = chatbot.build_graph()
 
 # Compteur d'appels LLM : wrappe le wrapper retry deja pose dans
-# 3_chatbot_ULTIME.py (le retry reste actif, on ajoute juste un comptage).
+# chatbot_pipeline.py (le retry reste actif, on ajoute juste un comptage).
 _llm_call_count = {"n": 0}
 _already_wrapped_create = chatbot.groq_client.chat.completions.create
 
@@ -147,7 +148,7 @@ def judge_faithfulness(final_answer: str, evidence_items: list) -> dict:
         chatbot.clean_chunk(e["text"])[:chatbot.GROUNDEDNESS_TRUNCATE_CHARS] for e in evidence_items
     )
     user_prompt = f"Preuves :\n{evidence_text}\n\nReponse a evaluer :\n{final_answer}"
-    result = chatbot.call_ollama_json(
+    result = chatbot.call_llm_json(
         chatbot.CONTROL_MODEL, FAITHFULNESS_SYSTEM, user_prompt, FAITHFULNESS_SCHEMA
     )
     if result is None:
@@ -165,7 +166,7 @@ def judge_correctness(final_answer: str, reference_answer: str, question: str) -
         f"Reponse de reference :\n{reference_answer}\n\n"
         f"Reponse du chatbot a evaluer :\n{final_answer}"
     )
-    result = chatbot.call_ollama_json(
+    result = chatbot.call_llm_json(
         chatbot.CONTROL_MODEL, CORRECTNESS_SYSTEM, user_prompt, CORRECTNESS_SCHEMA
     )
     if result is None:
@@ -512,7 +513,7 @@ def write_report(results, report_path, chart_path, today, baseline_results=None)
         meta={
             "Date d'exécution": today,
             "Jeu de test": f"evaluation/gold_eval_set.json ({len(results)} questions)",
-            "Pipeline évalué": "3_chatbot_ULTIME.py (build_graph(), pipeline complet)",
+            "Pipeline évalué": "chatbot_pipeline.py (build_graph(), pipeline complet)",
             "Juge LLM": "openai/gpt-oss-20b (Groq, CONTROL_MODEL) -- différent de GENERATION_MODEL (gpt-oss-120b) qui génère les réponses",
         },
         global_stats=global_stats,
