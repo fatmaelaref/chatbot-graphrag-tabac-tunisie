@@ -214,7 +214,10 @@ aucun poster jamais vérifié visuellement).
 Voir l'entrée correspondante dans `docs/JOURNAL_TRAVAIL.md` (renommage des
 scripts, factorisation du pipeline KG, correction de messages/commentaires
 périmés, séparation du journal complet non-publiable de cette version
-publique).
+publique). Ajout notable pour la reproductibilité : `evaluate.py --finalize-only
+--from resultats_20261011.json` régénère `rapport_evaluation.md` à partir d'un
+résultat officiel versionné, sans dépendre du checkpoint local
+`resultats_partial.json` (non versionné) ni nécessiter d'accès à Neo4j/Groq/Ollama.
 
 ## Limites connues restantes
 
