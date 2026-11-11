@@ -73,6 +73,7 @@ import re
 import copy
 import json
 import unicodedata
+from pathlib import Path
 from typing import TypedDict, Optional
 
 from openai import OpenAI  # utilise aussi pour Groq -- meme librairie, juste une autre adresse
@@ -231,6 +232,44 @@ def short_source(path: str) -> str:
     if not path:
         return "source inconnue"
     return path.split("\\")[-1].split("/")[-1]
+
+
+# ============================================================
+# METADONNEES DE SOURCE (noms lisibles + liens cliquables)
+# ============================================================
+# sources_meta.json fait le lien entre le nom de fichier brut (short_source(),
+# utilise partout comme cle d'identification interne -- state["sources"],
+# evaluation/, tests/) et un affichage propre (nom lisible, organisme, URL
+# officielle verifiee -- voir docs/JOURNAL_TRAVAIL.md pour la verification).
+# Separe explicitement : l'IDENTITE d'une source (le nom de fichier) ne
+# change jamais, seul son AFFICHAGE change ici.
+def _load_sources_meta() -> dict:
+    path = Path(__file__).resolve().parent / "sources_meta.json"
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
+
+
+SOURCES_META = _load_sources_meta()
+
+
+def get_source_meta(filename: str) -> dict:
+    """Metadonnees completes d'une source (display_name, organization, url)
+    pour l'interface. Fallback sur le nom de fichier brut et des champs None
+    si la source n'est pas (encore) documentee dans sources_meta.json --
+    n'echoue jamais, pour ne jamais casser l'affichage sur un fichier non
+    repertorie."""
+    return SOURCES_META.get(filename) or {
+        "display_name": filename, "organization": None, "url": None,
+    }
+
+
+def display_source(filename: str) -> str:
+    """Nom lisible d'une source, pour les citations inline montrees au LLM
+    de generation et pour la liste finale affichee a l'utilisateur."""
+    return get_source_meta(filename)["display_name"]
 
 
 FINAL_ANSWER_MARKER = "### REPONSE FINALE ###"
@@ -1069,7 +1108,7 @@ chiffre precis, dis-le moi et je peux verifier si une autre preuve du corpus le 
 def generate_answer(state: ChatState) -> ChatState:
     evidence = state.get("graded_evidence", [])
     evidence_text = "\n\n".join(
-        f"- ({e['origin']}, source: {e['source']})\n{clean_chunk(e['text'])[:GENERATION_TRUNCATE_CHARS]}"
+        f"- ({e['origin']}, source: {display_source(e['source'])})\n{clean_chunk(e['text'])[:GENERATION_TRUNCATE_CHARS]}"
         for e in evidence
     )
     user_prompt = f"Preuves disponibles :\n{evidence_text}\n\nQuestion : {state['search_query']}"
@@ -1249,7 +1288,11 @@ def finalize(state: ChatState) -> ChatState:
     answer = state.get("final_answer", "")
     sources = state.get("sources", [])
     if sources:
-        answer += "\n\n📚 Sources : " + ", ".join(sources)
+        # state["sources"] reste les noms de fichiers bruts (identite interne,
+        # utilisee par evaluation/ et tests/) -- seul l'AFFICHAGE ici passe par
+        # display_source() pour une citation lisible dans le texte.
+        display_names = sorted({display_source(s) for s in sources})
+        answer += "\n\n📚 Sources : " + ", ".join(display_names)
     answer += "\n\n⚠️ Cette information ne remplace pas un avis medical personnalise."
     return {**state, "final_answer": answer}
 

@@ -1,0 +1,52 @@
+{
+  "CHATBOT 1 TABAC LEGISLATION ET DONNEES EPIDEMIO.txt": {
+    "display_name": "Présentation LR01ES04 – Législation & épidémiologie",
+    "organization": "Laboratoire LR01ES04 – Faculté de Médecine de Tunis",
+    "url": null
+  },
+  "CHATBOT 2 Impact santé et avantages sevrage.txt": {
+    "display_name": "Impact sur la santé & avantages du sevrage",
+    "organization": "Laboratoire LR01ES04 – Faculté de Médecine de Tunis",
+    "url": null
+  },
+  "CHATBOT 3 SEVRAGE AVEC LES SUBSTITUTS NICOTINIQUES.txt": {
+    "display_name": "Sevrage avec les substituts nicotiniques (TSN)",
+    "organization": "Laboratoire LR01ES04 – Faculté de Médecine de Tunis",
+    "url": null
+  },
+  "CHATBOT 4 DEPENDANCE TABAGIQUE.txt": {
+    "display_name": "Dépendance tabagique",
+    "organization": "Laboratoire LR01ES04 – Faculté de Médecine de Tunis",
+    "url": null
+  },
+  "SOURCE_PDF_Quit_Guideline_Grossesse_Allaitement.txt": {
+    "display_name": "Quit – Guide sevrage pendant la grossesse et l'allaitement",
+    "organization": "Quit (Cancer Council Victoria) & The Royal Women's Hospital, Australie",
+    "url": "https://www.quitcentre.org.au/maternity"
+  },
+  "SOURCE_URL_CDC_Cigarette_Smoking.txt": {
+    "display_name": "CDC – Cigarette Smoking",
+    "organization": "CDC (Centers for Disease Control and Prevention), États-Unis",
+    "url": "https://www.cdc.gov/tobacco/about/index.html"
+  },
+  "SOURCE_URL_NHS_Ecigarettes.txt": {
+    "display_name": "NHS – Using e-cigarettes to stop smoking",
+    "organization": "NHS (National Health Service), Royaume-Uni",
+    "url": "https://www.nhs.uk/live-well/quit-smoking/using-e-cigarettes-to-stop-smoking/"
+  },
+  "SOURCE_URL_NHS_Tabagisme_Passif.txt": {
+    "display_name": "NHS – Passive smoking",
+    "organization": "NHS (National Health Service), Royaume-Uni",
+    "url": "https://www.nhs.uk/live-well/quit-smoking/passive-smoking-protect-your-family-and-friends/"
+  },
+  "SOURCE_URL_OMS_Tabac_Fiche.txt": {
+    "display_name": "OMS – Tobacco and nicotine (fiche d'information)",
+    "organization": "Organisation Mondiale de la Santé (OMS)",
+    "url": "https://www.who.int/news-room/fact-sheets/detail/tobacco"
+  },
+  "SOURCE_URL_SantePubliqueFrance_Consequences.txt": {
+    "display_name": "Santé publique France – Conséquences du tabagisme sur la santé",
+    "organization": "Santé publique France",
+    "url": "https://www.santepubliquefrance.fr/tabac/quelles-sont-les-consequences-du-tabagisme-sur-la-sante"
+  }
+}
