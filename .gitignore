@@ -15,6 +15,12 @@ archive/
 # Checkpoint de reprise d'evaluate.py -- transitoire, pas un résultat final
 evaluation/resultats_partial.json
 
+# Journal de travail complet -- contient des details de session (incidents,
+# contexte personnel) qui ne sont pas destines a la publication. Reste sur
+# disque dans docs/JOURNAL_TRAVAIL.md, jamais versionne. Voir
+# docs/JOURNAL_PUBLIC.md pour la version publique epuree.
+docs/JOURNAL_TRAVAIL.md
+
 # Presentations du laboratoire (documents/*.pptx) et leur extraction texte
 # (textes/CHATBOT *.txt) -- diffusion non autorisee, restent uniquement en
 # local. Les 6 autres fichiers de textes/ (sources publiques OMS/NHS/CDC/
