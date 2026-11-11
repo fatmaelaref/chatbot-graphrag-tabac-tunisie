@@ -26,3 +26,13 @@ textes/CHATBOT*.txt
 log.txt
 log_*.txt
 evaluation/log_*.txt
+
+# Residus de compilation LaTeX (poster_tabac.tex) -- regenerables, pas le
+# .pdf final (garde volontairement, voir discussion avec l'utilisatrice)
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.synctex.gz

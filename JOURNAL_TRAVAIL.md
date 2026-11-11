@@ -1514,3 +1514,39 @@ autres restrictions institutionnelles, deja signalee a l'utilisatrice).
    faites, correctif Mesure/Programme non revalide par un vrai
    retraitement, `app_streamlit.py` non teste en conditions reelles
    (navigateur).
+
+## Refonte du poster (2026-10-14/15, sur retour explicite "j'ai pas aime")
+
+Premiere version (simple mise a jour des chiffres de `poster_tabac.tex`, meme
+structure academique 3 colonnes qu'avant) rejetee par l'utilisatrice. Recherche
+web faite sur le design de poster academique avant de recommencer (#BetterPoster
+de Mike Morrison, guides 2026 UC Davis/Venngage/etc.) -- synthese et choix de
+style valides avec l'utilisatrice via question : format **#BetterPoster** choisi
+(message central enorme + colonne "silent presenter" + colonne "ammo bar"),
+plutot que l'academique classique epure.
+
+**MiKTeX installe** (`winget install MiKTeX.MiKTeX`) pour pouvoir compiler et
+verifier reellement le rendu -- la session precedente n'avait aucun compilateur
+LaTeX disponible et avait livre un poster jamais verifie visuellement. Bien fait :
+la 1ere version du nouveau poster debordait de 21 cm en bas de page (contenu
+invisible a l'impression) ; corrige et reverifie par compilation + rasterisation
+(PyMuPDF) a 3 reprises jusqu'a un rendu propre (aucun overfull/underfull vbox,
+page bien remplie).
+
+**Etat actuel** : `poster_tabac.tex` entierement restructure (format
+#BetterPoster), `resultats_comparaison.png` regenere avec les chiffres finaux
+(81/81 du 11/10) selon le skill dataviz (palette navy/mid validee comme paire
+ordinale). `poster_tabac.pdf` compile et present sur disque mais **PAS ENCORE
+COMMITE** -- l'utilisatrice a ferme la session avant de repondre a 2 questions en
+attente :
+1. Inclure `poster_tabac.pdf` dans le commit en plus du `.tex`/figure/gitignore ?
+   (elle avait commence a repondre "oui, inclure le PDF" avant de s'arreter)
+2. Garder MiKTeX installe sur la machine, ou le desinstaller
+   (`winget uninstall MiKTeX.MiKTeX`) ?
+
+**A faire a la prochaine reprise** : redemander ces 2 questions, puis commiter.
+Points de finition encore ouverts sur le poster lui-meme : le QR code est un
+placeholder honnete ("a ajouter a la publication GitHub") -- a remplacer par un
+vrai QR code une fois un lien stable disponible (rapport Claude Docs, ou depot
+GitHub). Logos `Logo_ESSAIT.png`/`Logo_LR01ES04.png` toujours absents (cadres de
+remplacement affiches a la place).
