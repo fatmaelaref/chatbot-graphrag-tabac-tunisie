@@ -22,7 +22,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# 3_chatbot_ULTIME.py imprime des emojis -- sans ca, la console Windows
+# chatbot_pipeline.py imprime des emojis -- sans ca, la console Windows
 # (cp1252) plante avec un UnicodeEncodeError des le premier print (meme
 # correctif que evaluation/evaluate.py).
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -31,7 +31,7 @@ sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 load_dotenv()
 
 PROJECT_DIR = Path(__file__).parent
-CHATBOT_MODULE_PATH = PROJECT_DIR / "3_chatbot_ULTIME.py"
+CHATBOT_MODULE_PATH = PROJECT_DIR / "chatbot_pipeline.py"
 
 results = []  # [(nom, ok: bool, detail: str, duree: float)]
 

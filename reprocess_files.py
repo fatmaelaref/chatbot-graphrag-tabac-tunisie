@@ -2,7 +2,7 @@
 ============================================================
 RETRAITER PLUSIEURS FICHIERS PRECIS (ceux qui ont manque des entites)
 ============================================================
-Reutilise exactement la meme configuration que 2_build_kg_ULTIME.py
+Reutilise exactement la meme configuration que build_knowledge_graph.py
 (meme schema, meme prompt, meme modele) mais ne traite que les
 fichiers listes ci-dessous, au lieu des 10 -- utile quand certaines
 entites (ex: PNRT, Projet FCTC 20-30) n'ont pas ete extraites lors
@@ -19,17 +19,12 @@ import asyncio
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
 
-from neo4j_graphrag.embeddings import OllamaEmbeddings
-from neo4j_graphrag.experimental.pipeline.kg_builder import SimpleKGPipeline
-from neo4j_graphrag.experimental.components.types import LexicalGraphConfig
-
-from kg_config import (
-    text_splitter,
-    NODE_TYPES,
-    RELATIONSHIP_TYPES,
-    prompt_template,
-    FixedOllamaLLM,
-    OLLAMA_JSON_SCHEMA,
+from kg_pipeline_common import (
+    LLM_MODEL_NAME,
+    build_llm_and_embedder,
+    build_kg_pipeline,
+    merge_case_insensitive_duplicates,
+    relabel_source_without_path_as_citation,
 )
 
 # ============================================================
@@ -39,25 +34,14 @@ FICHIERS_A_RETRAITER = [
     "./textes/SOURCE_URL_SantePubliqueFrance_Consequences.txt",   # PNRT
     "./textes/CHATBOT 1 TABAC LEGISLATION ET DONNEES EPIDEMIO.txt",  # Projet FCTC 20-30
 ]
-# Normalise en slash : 2_build_kg_ULTIME.py fait pareil depuis le 2026-10-07
+# Normalise en slash : build_knowledge_graph.py fait pareil depuis le 2026-10-07
 # (glob.glob renvoie des antislash sur Windows) -- sans ca, ce script ne
-# retrouve pas le noeud Source cree par 2_build_kg_ULTIME.py (chemins
+# retrouve pas le noeud Source cree par build_knowledge_graph.py (chemins
 # differents malgre le meme fichier) et en cree un deuxieme au lieu de le
 # nettoyer avant retraitement (constate en pratique : 2 fichiers dupliques).
 FICHIERS_A_RETRAITER = [f.replace("\\", "/") for f in FICHIERS_A_RETRAITER]
 
 load_dotenv()
-
-lexical_config = LexicalGraphConfig(
-    chunk_node_label="Article",
-    document_node_label="Source",
-    chunk_to_document_relationship_type="DANS_SOURCE",
-    next_chunk_relationship_type="ARTICLE_SUIVANT",
-    node_to_chunk_relationship_type="DANS_ARTICLE",
-    chunk_embedding_property="vecteur",
-)
-
-LLM_MODEL_NAME = "qwen2.5:7b"
 
 print("=" * 60)
 print(f"RETRAITEMENT DE {len(FICHIERS_A_RETRAITER)} FICHIER(S) CIBLE(S)")
@@ -76,34 +60,15 @@ neo4j_driver = GraphDatabase.driver(
 neo4j_driver.verify_connectivity()
 print("✅ Connecté à Neo4j")
 
-llm = FixedOllamaLLM(
-    model_name=LLM_MODEL_NAME,
-    model_params={
-        "options": {"temperature": 0.0, "num_ctx": 8192, "num_predict": 2048},
-        "format": OLLAMA_JSON_SCHEMA,
-    },
-)
-embedder = OllamaEmbeddings(model="nomic-embed-text")
+llm, embedder = build_llm_and_embedder()
 print(f"✅ LLM ({LLM_MODEL_NAME}) et embedder chargés")
 
-kg_builder = SimpleKGPipeline(
-    llm=llm,
-    driver=neo4j_driver,
-    neo4j_database=None,
-    embedder=embedder,
-    from_pdf=False,
-    lexical_graph_config=lexical_config,
-    text_splitter=text_splitter,
-    prompt_template=prompt_template,
-    schema={"node_types": NODE_TYPES, "relationship_types": RELATIONSHIP_TYPES},
-    perform_entity_resolution=False,  # le resolveur integre de neo4j_graphrag appelle
-                                        # lui-meme apoc.refactor.mergeNodes en fin de
-                                        # traitement -- constate en pratique : plante
-                                        # avec "Node XXX not found" quand plusieurs
-                                        # groupes de doublons se chevauchent. On a deja
-                                        # notre propre fusion (plus bas, identique a celle
-                                        # de 2_build_kg_ULTIME.py), donc on desactive celui-ci.
-)
+# perform_entity_resolution=False (voir kg_pipeline_common.build_kg_pipeline) :
+# le resolveur integre de neo4j_graphrag appelle lui-meme apoc.refactor.mergeNodes
+# en fin de traitement -- constate en pratique : plante avec "Node XXX not found"
+# quand plusieurs groupes de doublons se chevauchent. On a deja notre propre
+# fusion (plus bas), donc on desactive celui-ci.
+kg_builder = build_kg_pipeline(neo4j_driver, llm, embedder)
 print("✅ Pipeline configuré")
 
 
@@ -119,7 +84,7 @@ def _nettoyer_source_existante(fichier: str) -> None:
     Loi, etc.) deja extraites ne sont PAS touchees ici, seulement le noeud
     Source et ses chunks Article, qui seront recrees proprement juste apres.
     """
-    result = neo4j_driver.execute_query(
+    neo4j_driver.execute_query(
         """
         MATCH (s:Source {path: $path})
         OPTIONAL MATCH (a:Article)-[:DANS_SOURCE]->(s)
@@ -147,47 +112,22 @@ async def retraiter_tout():
 
 asyncio.run(retraiter_tout())
 
-# Fusion des doublons casse/accents/type sur TOUT le graphe -- identique a la
-# Section 5bis de 2_build_kg_ULTIME.py (voir ce fichier pour le detail du
-# correctif accents du 2026-10-07). Comme le resolveur integre est desactive
-# ci-dessus, c'est desormais la SEULE fusion qui s'applique -- deterministe,
-# pas de plantage possible sur des noeuds entre-temps disparus (elle recalcule
-# les groupes juste avant de fusionner, dans la meme requete).
+# Fusion des doublons + filet de securite sur TOUT le graphe -- memes requetes
+# partagees que build_knowledge_graph.py (voir kg_pipeline_common.py). Comme
+# le resolveur integre est desactive ci-dessus, c'est desormais la SEULE
+# fusion qui s'applique -- deterministe, pas de plantage possible sur des
+# noeuds entre-temps disparus (elle recalcule les groupes juste avant de
+# fusionner, dans la meme requete).
 print("\n" + "=" * 60)
 print("FUSION DES DOUBLONS (casse/accents/type)")
 print("=" * 60)
-merge_case_insensitive_query = """
-MATCH (e:__Entity__)
-WITH e, apoc.text.clean(e.name) AS cle,
-     CASE WHEN e.name =~ '.*[àâäéèêëîïôöùûüçÀÂÄÉÈÊËÎÏÔÖÙÛÜÇ].*' THEN 1 ELSE 0 END AS quality
-WHERE cle IS NOT NULL AND cle <> ''
-ORDER BY cle, quality DESC
-WITH cle, collect(e) AS noeuds
-WHERE size(noeuds) > 1
-CALL apoc.refactor.mergeNodes(noeuds, {properties: 'discard', mergeRels: true}) YIELD node
-RETURN count(node) AS nb_fusionnes
-"""
-try:
-    merge_result = neo4j_driver.execute_query(merge_case_insensitive_query)
-    nb = merge_result.records[0]["nb_fusionnes"] if merge_result.records else 0
-    print(f"   ✅ {nb} groupe(s) de doublons fusionnés (casse/type)")
-except Exception as e:
-    print(f"   ⚠️ Erreur pendant la fusion automatique : {e}")
+nb = merge_case_insensitive_duplicates(neo4j_driver)
+if nb >= 0:
+    print(f"   ✅ {nb} groupe(s) de doublons fusionnés (casse/accents/type)")
 
-# Filet de securite identique a celui de 2_build_kg_ULTIME.py (section 5ter) :
-# un noeud Source sans propriete path est une collision de label (reference
-# bibliographique extraite a tort comme Source au lieu de Citation).
-try:
-    relabel_result = neo4j_driver.execute_query("""
-        MATCH (s:Source) WHERE s.path IS NULL
-        REMOVE s:Source
-        SET s:Citation
-        RETURN count(s) AS n
-    """)
-    nb = relabel_result.records[0]["n"] if relabel_result.records else 0
+nb = relabel_source_without_path_as_citation(neo4j_driver)
+if nb >= 0:
     print(f"   ✅ {nb} noeud(s) Source sans path relabelisé(s) en Citation")
-except Exception as e:
-    print(f"   ⚠️ Erreur pendant le relabelling : {e}")
 
 # Verification rapide : les entites cherchees sont-elles bien la maintenant ?
 # Recherche elargie (pas juste "pnrt"/"fctc 20-30") au cas ou le nom extrait

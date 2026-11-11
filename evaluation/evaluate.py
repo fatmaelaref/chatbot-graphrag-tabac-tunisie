@@ -4,7 +4,7 @@ evaluate.py -- EVALUATION DU PIPELINE GRAPHRAG COMPLET
 PROJET TABAC TUNISIE
 ============================================================
 Remplace et etend 4_evaluate_chatbot.py (deplace ici). Fait tourner le
-pipeline LangGraph complet de 3_chatbot_ULTIME.py (routage -> reecriture ->
+pipeline LangGraph complet de chatbot_pipeline.py (routage -> reecriture ->
 recherche hybride -> grading -> generation -> verification groundedness) sur
 gold_eval_set.json et calcule, par question puis agrege par categorie/type :
 
@@ -33,6 +33,7 @@ commande : `python evaluate.py` depuis le dossier evaluation/.
 import importlib.util
 import json
 import math
+import re
 import sys
 import time
 from datetime import date
@@ -44,38 +45,53 @@ sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 EVAL_DIR = Path(__file__).parent
 PROJECT_DIR = EVAL_DIR.parent
 GOLD_SET_PATH = EVAL_DIR / "gold_eval_set.json"
-CHATBOT_MODULE_PATH = PROJECT_DIR / "3_chatbot_ULTIME.py"
+CHATBOT_MODULE_PATH = PROJECT_DIR / "chatbot_pipeline.py"
 
 sys.path.insert(0, str(EVAL_DIR))
 from common import (normalize, element_recall, retrieval_hit, infer_behavior,
                      avg, mrr, median, aggregate_by, write_markdown_report,
                      plot_category_scores)
 
-# ============================================================
-# 0. IMPORT DYNAMIQUE DE 3_chatbot_ULTIME.py (nom commence par un chiffre)
-# ============================================================
-spec = importlib.util.spec_from_file_location("chatbot_ultime", CHATBOT_MODULE_PATH)
-chatbot = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(chatbot)
-
 print("=" * 60)
 print("EVALUATION DU PIPELINE GRAPHRAG -- jeu de test gold")
 print("=" * 60)
 
-app = chatbot.build_graph()
-
-# Compteur d'appels LLM : wrappe le wrapper retry deja pose dans
-# 3_chatbot_ULTIME.py (le retry reste actif, on ajoute juste un comptage).
+# ============================================================
+# 0. CHARGEMENT PARESSEUX DE chatbot_pipeline.py (vit dans le dossier
+#    parent, pas dans evaluation/ -- pas un package, donc pas importable
+#    normalement)
+# ============================================================
+# Importer chatbot_pipeline.py execute son code de niveau module, qui
+# construit un VectorCypherRetriever -- celui-ci interroge REELLEMENT Neo4j
+# a la construction (SHOW VECTOR INDEXES). `--finalize-only` et `--from` ne
+# font que reagreger des resultats deja notes (aucune question relancee) :
+# differer ce chargement jusqu'au premier `run_question()` reel leur evite
+# d'exiger Neo4j/Groq pour rien.
+chatbot = None
+app = None
 _llm_call_count = {"n": 0}
-_already_wrapped_create = chatbot.groq_client.chat.completions.create
 
 
-def _counting_create(*args, **kwargs):
-    _llm_call_count["n"] += 1
-    return _already_wrapped_create(*args, **kwargs)
+def _ensure_pipeline_loaded():
+    global chatbot, app
+    if chatbot is not None:
+        return
 
+    spec = importlib.util.spec_from_file_location("chatbot_ultime", CHATBOT_MODULE_PATH)
+    chatbot = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(chatbot)
+    app = chatbot.build_graph()
 
-chatbot.groq_client.chat.completions.create = _counting_create
+    # Compteur d'appels LLM : wrappe le wrapper retry deja pose dans
+    # chatbot_pipeline.py (le retry reste actif, on ajoute juste un comptage).
+    already_wrapped_create = chatbot.groq_client.chat.completions.create
+
+    def _counting_create(*args, **kwargs):
+        _llm_call_count["n"] += 1
+        return already_wrapped_create(*args, **kwargs)
+
+    chatbot.groq_client.chat.completions.create = _counting_create
+
 
 # ============================================================
 # 1. JUGES LLM (prompts dedies, JSON strict, temperature 0)
@@ -147,7 +163,7 @@ def judge_faithfulness(final_answer: str, evidence_items: list) -> dict:
         chatbot.clean_chunk(e["text"])[:chatbot.GROUNDEDNESS_TRUNCATE_CHARS] for e in evidence_items
     )
     user_prompt = f"Preuves :\n{evidence_text}\n\nReponse a evaluer :\n{final_answer}"
-    result = chatbot.call_ollama_json(
+    result = chatbot.call_llm_json(
         chatbot.CONTROL_MODEL, FAITHFULNESS_SYSTEM, user_prompt, FAITHFULNESS_SCHEMA
     )
     if result is None:
@@ -165,7 +181,7 @@ def judge_correctness(final_answer: str, reference_answer: str, question: str) -
         f"Reponse de reference :\n{reference_answer}\n\n"
         f"Reponse du chatbot a evaluer :\n{final_answer}"
     )
-    result = chatbot.call_ollama_json(
+    result = chatbot.call_llm_json(
         chatbot.CONTROL_MODEL, CORRECTNESS_SYSTEM, user_prompt, CORRECTNESS_SCHEMA
     )
     if result is None:
@@ -191,6 +207,7 @@ def is_abstention(final_answer: str) -> bool:
 # 2. BOUCLE D'EVALUATION
 # ============================================================
 def run_question(item: dict) -> dict:
+    _ensure_pipeline_loaded()
     _llm_call_count["n"] = 0
     start = time.time()
 
@@ -299,10 +316,53 @@ def main():
     parser.add_argument("--finalize-only", action="store_true",
                          help="Ne relance aucune question -- regenere juste le rapport/CSV/"
                               "graphique a partir de resultats_partial.json existant.")
+    parser.add_argument("--from", dest="from_file", default=None, metavar="FICHIER.json",
+                         help="Regenere UNIQUEMENT le rapport (+ graphique) a partir de ce "
+                              "fichier resultats_*.json officiel deja complet (ex. "
+                              "resultats_20261011.json), au lieu de resultats_partial.json -- "
+                              "qui est local/non versionne et donc absent d'un clone frais du "
+                              "depot. Implique --finalize-only : aucune question n'est "
+                              "relancee, et contrairement a --finalize-only seul, n'ecrit PAS "
+                              "de nouveaux resultats_AAAAMMJJ.json/.csv (la source en est deja "
+                              "un officiel).")
     args = parser.parse_args()
 
     with open(GOLD_SET_PATH, encoding="utf-8") as f:
         gold_set = json.load(f)
+
+    if args.from_file:
+        from_path = Path(args.from_file)
+        if not from_path.exists():
+            from_path = EVAL_DIR / args.from_file
+        if not from_path.exists():
+            print(f"❌ Fichier introuvable : {args.from_file}")
+            sys.exit(1)
+
+        with open(from_path, encoding="utf-8") as f:
+            results = json.load(f)
+
+        # La date du rapport doit refleter celle du run officiel source (son
+        # nom de fichier), pas la date de cette regeneration -- sinon le
+        # rapport regenere ne serait jamais identique a l'original, meme a
+        # donnees inchangees.
+        date_match = re.search(r"(\d{8})", from_path.stem)
+        today = date_match.group(1) if date_match else date.today().strftime("%Y%m%d")
+
+        print(f"\n[i] Regeneration du rapport a partir de {from_path} "
+              f"({len(results)} questions, date={today}) -- resultats_partial.json ignore, "
+              f"aucun resultats_{{date}}.json/.csv reecrit.")
+
+        report_path = EVAL_DIR / "rapport_evaluation.md"
+        chart_path = EVAL_DIR / "scores_par_categorie.png"
+
+        print_summary(results)
+        baseline_results = load_latest_baseline()
+        write_report(results, report_path, chart_path, today, baseline_results)
+
+        print(f"\nRapport regenere depuis {from_path.name}.")
+        print(f"Rapport : {report_path}")
+        print(f"Graphique : {chart_path}")
+        return
 
     results = _load_partial()
     done_ids = {r["id"] for r in results}
@@ -338,7 +398,8 @@ def main():
     if remaining > 0:
         print(f"\n{len(results)}/{len(gold_set)} traitées jusqu'ici -- {remaining} restantes.")
         print("Relance `python evaluate.py` (même commande) pour continuer là où ça s'est arrêté.")
-        chatbot.driver.close()
+        if chatbot is not None:
+            chatbot.driver.close()
         return
 
     today = date.today().strftime("%Y%m%d")
@@ -356,7 +417,8 @@ def main():
     baseline_results = load_latest_baseline()
     write_report(results, report_path, chart_path, today, baseline_results)
 
-    chatbot.driver.close()
+    if chatbot is not None:
+        chatbot.driver.close()
     print(f"\nToutes les {len(gold_set)} questions sont traitées.")
     print(f"Détail complet : {results_json_path}")
     print(f"CSV : {results_csv_path}")
@@ -512,7 +574,7 @@ def write_report(results, report_path, chart_path, today, baseline_results=None)
         meta={
             "Date d'exécution": today,
             "Jeu de test": f"evaluation/gold_eval_set.json ({len(results)} questions)",
-            "Pipeline évalué": "3_chatbot_ULTIME.py (build_graph(), pipeline complet)",
+            "Pipeline évalué": "chatbot_pipeline.py (build_graph(), pipeline complet)",
             "Juge LLM": "openai/gpt-oss-20b (Groq, CONTROL_MODEL) -- différent de GENERATION_MODEL (gpt-oss-120b) qui génère les réponses",
         },
         global_stats=global_stats,
