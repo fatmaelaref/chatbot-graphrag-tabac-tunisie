@@ -1,6 +1,6 @@
 """
 ============================================================
-INTERFACE VISUELLE (Streamlit) v2 -- PROJET TABAC TUNISIE
+INTERFACE VISUELLE (Streamlit) -- PROJET TABAC TUNISIE
 ============================================================
 Developpement d'un ChatBot sur le tabagisme en Tunisie:
 legislation, sevrage tabagique, epidemiologie, effets sur la sante.
@@ -11,23 +11,22 @@ grading, generation, verification de groundedness). Si tu modifies le
 pipeline plus tard, cette interface suit automatiquement -- rien a
 recopier ici.
 
-Prerequis (dossier "assets" avec les 6 images a cote de ce fichier) :
-    mon_projet_tabac/
-        chatbot_pipeline.py
-        app.py                 <- ce fichier
-        assets/
-            banner.png
-            icon_legislation.png
-            icon_sevrage.png
-            icon_dependance.png
-            icon_epidemio.png
-            icon_sante.png
+Style "app sante professionnelle" : une seule couleur d'accent (teal,
+voir .streamlit/config.toml), fond blanc, police Inter, icones Lucide
+(licence ISC -- voir README.md) en SVG inline recolorees a l'accent.
+Aucune image/asset externe requise (la bannière et les icônes PNG
+precedentes ont ete retirees).
 
 Lancement :
     pip install streamlit
     streamlit run app.py
+Mode demo (expose le detail technique du pipeline, pour une soutenance) :
+    streamlit run app.py -- --debug     (ou ouvrir l'URL avec ?debug=1,
+    ou cocher "Mode demo" dans la barre laterale -- voir README.md)
 """
 
+import base64
+import ssl
 import time
 import io
 import re
@@ -36,12 +35,33 @@ import importlib.util
 from pathlib import Path
 
 import streamlit as st
+from neo4j.exceptions import ServiceUnavailable
+
 
 BASE_DIR = Path(__file__).parent
-ASSETS = BASE_DIR / "assets"
+PRIMARY_COLOR = "#0F766E"  # doit rester synchronise avec .streamlit/config.toml
 
 # ============================================================
-# 1. CHARGEMENT DU PIPELINE EXISTANT
+# 1. MODE DEMO (?debug=1 dans l'URL, ou case a cocher) -- voir README.md
+# ============================================================
+# Cache par defaut : un vrai utilisateur ne doit pas voir de jargon pipeline
+# (routage, grading, groundedness...). Reserve aux demonstrations/soutenance.
+# Determine AVANT le chargement du pipeline : si Neo4j est injoignable,
+# le st.stop() qui suit interrompt le script avant que la sidebar ne soit
+# normalement dessinee plus bas -- il faut donc deja savoir ici si on est
+# en mode demo pour decider d'afficher ou non le detail de l'erreur.
+_debug_from_url = st.query_params.get("debug") == "1"
+with st.sidebar:
+    st.markdown("### Options")
+    demo_mode = st.checkbox(
+        "Mode démo (détail technique du pipeline)",
+        value=_debug_from_url,
+        help="Affiche le détail interne du traitement (routage, recherche, "
+             "notation des preuves, vérification). Réservé aux démonstrations.",
+    )
+
+# ============================================================
+# 2. CHARGEMENT DU PIPELINE EXISTANT
 # ============================================================
 @st.cache_resource(show_spinner="Chargement du pipeline (connexion Neo4j + Groq)...")
 def load_pipeline():
@@ -49,13 +69,27 @@ def load_pipeline():
     spec = importlib.util.spec_from_file_location("chatbot_core", module_path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
+    # Mode strict actif UNIQUEMENT ici (interface reelle) : si Groq sature
+    # (429) pendant le routage/grading/generation, mieux vaut un message de
+    # statut clair qu'une reponse degradee qui a l'air normale. evaluate.py/
+    # baseline.py/ablation_graphe.py ne passent jamais par ce fichier, donc
+    # leur comportement (et leurs metriques) restent inchanges.
+    module.STRICT_LLM_FAILURE_MODE = True
     # On garde le module (pas seulement le graphe compile) pour pouvoir
     # reutiliser get_source_meta() plus bas -- une seule source de verite
     # pour le mapping fichier -> nom affiche/organisme/URL.
     return module.build_graph(), module
 
 
-compiled_app, chatbot = load_pipeline()
+try:
+    compiled_app, chatbot = load_pipeline()
+except (ServiceUnavailable, ssl.SSLError) as e:
+    st.error("Base de données momentanément injoignable, réessaie dans un instant.")
+    if demo_mode:
+        # Type d'exception uniquement -- jamais str(e), qui peut contenir
+        # l'URI Neo4j ou d'autres details de connexion.
+        st.caption(f"Détail technique (mode démo) : {type(e).__name__}")
+    st.stop()
 
 # Citation textuelle ajoutee par chatbot_pipeline.finalize() ("\n\n📚 Sources :
 # ...") -- retiree de l'affichage ici car remplacee par les cartes cliquables
@@ -69,7 +103,7 @@ def render_source_cards(filenames: list[str]) -> None:
     de l'organisme + nom + lien externe si disponible)."""
     if not filenames:
         return
-    st.markdown("**📚 Sources**")
+    st.markdown("**Sources**")
     cards_html = ['<div style="display:flex;flex-wrap:wrap;gap:0.6rem;">']
     for filename in sorted(set(filenames)):
         meta = chatbot.get_source_meta(filename)
@@ -80,15 +114,15 @@ def render_source_cards(filenames: list[str]) -> None:
         # Couleurs theme-safe : teinte neutre semi-transparente (visible sur
         # fond clair ET sombre) plutot que des hex clairs fixes ; le texte
         # n'impose pas de couleur (herite celle du theme actif), seule
-        # l'opacite distingue le sous-titre -- fonctionne dans les deux themes.
+        # l'opacite distingue le sous-titre.
         inner = f"""
           <div style="display:flex;align-items:center;gap:0.5rem;
-                      border:1px solid rgba(128,128,128,0.35);border-radius:10px;
-                      padding:0.5rem 0.75rem;background:rgba(128,128,128,0.08);max-width:260px;">
-            <div style="flex-shrink:0;width:28px;height:28px;border-radius:50%;
-                        background:#eb6834;color:white;display:flex;
+                      border:1px solid rgba(128,128,128,0.30);border-radius:10px;
+                      padding:0.5rem 0.75rem;background:rgba(128,128,128,0.06);max-width:260px;">
+            <div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;
+                        background:{PRIMARY_COLOR};color:white;display:flex;
                         align-items:center;justify-content:center;
-                        font-weight:700;font-size:0.85rem;">{initial}</div>
+                        font-weight:700;font-size:0.8rem;">{initial}</div>
             <div style="line-height:1.2;">
               <div style="font-size:0.85rem;font-weight:600;">{display_name}</div>
               {f'<div style="font-size:0.72rem;opacity:0.65;">{organization}</div>' if organization else ''}
@@ -105,88 +139,169 @@ def render_source_cards(filenames: list[str]) -> None:
     cards_html.append("</div>")
     st.markdown("".join(cards_html), unsafe_allow_html=True)
 
+
 # ============================================================
-# 2. CONFIGURATION DE LA PAGE + STYLE
+# 3. ICONES (Lucide, licence ISC -- https://lucide.dev, voir README.md)
+# ============================================================
+# SVG inline recolorees a la couleur d'accent (trait fin, stroke-width 1.75).
+# Remplacent les icones PNG "illustrations colorees" de l'iteration
+# precedente (supprimees de assets/) : plus de style maison invente, une
+# bibliotheque libre et coherente a la place.
+_ICON_SVG_TEMPLATE = """<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="1.75"
+stroke-linecap="round" stroke-linejoin="round">{paths}</svg>"""
+
+_ICON_PATHS = {
+    # legislation -- "scale"
+    "legislation": (
+        '<path d="M12 3v18"/><path d="m19 8 3 8a5 5 0 0 1-6 0zV7"/>'
+        '<path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"/>'
+        '<path d="m5 8 3 8a5 5 0 0 1-6 0zV7"/><path d="M7 21h10"/>'
+    ),
+    # sevrage -- "pill"
+    "sevrage": (
+        '<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/>'
+        '<path d="m8.5 8.5 7 7"/>'
+    ),
+    # dependance -- "brain"
+    "dependance": (
+        '<path d="M12 18V5"/><path d="M15 13a4.17 4.17 0 01-3-4 4.17 4.17 0 01-3 4"/>'
+        '<path d="M17.707 6.294A3 3 0 1012 5a3 3 0 10-5.707 1.294"/>'
+        '<path d="M17.996 5.125a4 4 0 012.526 5.77"/><path d="M18 18a4 4 0 002-7.465"/>'
+        '<path d="M19.967 17.482a4 4 0 11-7.967.517 4 4 0 11-7.967-.517"/>'
+        '<path d="M6 18a4 4 0 01-2-7.465"/><path d="M6.004 5.125a4 4 0 00-2.526 5.77"/>'
+    ),
+    # epidemio -- "bar-chart-3"
+    "epidemio": (
+        '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/>'
+        '<path d="M13 17V5"/><path d="M8 17v-3"/>'
+    ),
+    # sante -- "heart-pulse"
+    "sante": (
+        '<path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5'
+        'c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"/>'
+        '<path d="M3.22 13H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/>'
+    ),
+}
+
+
+def _icon_data_uri(theme_key: str, color: str = PRIMARY_COLOR) -> str:
+    svg = _ICON_SVG_TEMPLATE.format(color=color, paths=_ICON_PATHS[theme_key])
+    b64 = base64.b64encode(svg.encode("utf-8")).decode("ascii")
+    return f"data:image/svg+xml;base64,{b64}"
+
+
+# ============================================================
+# 4. CONFIGURATION DE LA PAGE + STYLE
 # ============================================================
 st.set_page_config(
     page_title="Chatbot Tabagisme Tunisie",
-    page_icon="🚭",
+    page_icon="🩺",
     layout="centered",
 )
 
 st.markdown(
-    """
+    f"""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-    /* Police moderne -- EXCLUT explicitement les icones Material de Streamlit
-       (ex. le chevron de st.expander) : leur appliquer une police texte casse
-       le rendu de l'icone (elle s'affiche en texte brut
-       "keyboard_arrow_right" au lieu du glyphe). Premier essai (font-family:
-       unset) insuffisant : `unset` reprend la valeur HERITEE du parent, qui
-       est justement 'Inter' a cause de la regle ci-dessous sur `div`/`span`
-       ancetres -- il faut reposer EXPLICITEMENT le nom exact que Streamlit
-       utilise ('Material Symbols Rounded', trouve dans son propre CSS),
-       pas un unset qui remonte la cascade jusqu'a notre propre regle. */
-    html, body, p, span, div, li, label, textarea, button {
+    /* Police sobre -- EXCLUT explicitement les icones Material de Streamlit
+       (ex. le chevron de st.expander) : leur appliquer une police texte
+       casse le rendu de l'icone (elle s'affiche en texte brut au lieu du
+       glyphe). Vu en pratique : il faut reposer EXPLICITEMENT le nom exact
+       que Streamlit utilise ('Material Symbols Rounded'), un simple `unset`
+       remonte a la valeur HERITEE du parent (= Inter, via la regle du
+       dessous) au lieu de la police d'origine. */
+    html, body, p, span, div, li, label, textarea, button, h1, h2, h3 {{
         font-family: 'Inter', sans-serif;
-    }
-    [data-testid="stIconMaterial"] {
+    }}
+    [data-testid="stIconMaterial"] {{
         font-family: 'Material Symbols Rounded' !important;
-    }
-    h1, h2, h3, .stMarkdown h3 { font-family: 'Poppins', sans-serif; }
+    }}
 
-    /* Cartes de theme et conteneurs bordes -- s'appuie sur le conteneur natif
-       Streamlit (deja theme-aware clair/sombre) plutot que sur des couleurs
-       fixes, pour rester lisible dans les deux themes. */
-    div[data-testid="stVerticalBlockBorderWrapper"] {
-        border-radius: 16px;
-    }
-    .theme-caption {
-        text-align: center;
-        font-weight: 600;
-        margin-top: 6px;
-        font-size: 0.95rem;
-    }
+    /* Cartes -- epure, fond blanc, bordure neutre fine, pas de degrade. */
+    div[data-testid="stVerticalBlockBorderWrapper"] {{
+        border-radius: 12px;
+    }}
 
-    /* Reponse mise en valeur : le conteneur natif st.container(border=True)
-       qui l'entoure (classe answer-box) recoit un accent colore en haut --
-       fonctionne en theme clair ET sombre (le conteneur natif gere deja le
-       fond/la bordure de base, on ajoute juste un liseré). */
-    div[data-testid="stVerticalBlockBorderWrapper"]:has(.answer-box-marker) {
-        border-top: 4px solid #eb6834;
+    /* Theme card cliquable en entier : st.container(key=...) + st.button a
+       l'interieur -- le bouton est etire pour occuper tout le conteneur,
+       icone en fond positionne en haut, libelle du bouton pousse sous
+       l'icone. labels jamais tronques : white-space normal + wrap au mot.
+       Selecteur par PREFIXE d'attribut (pas de classe "marqueur" separee --
+       un <span> vide n'a pas le bouton comme descendant, donc `.theme-card
+       button` ne matchait jamais rien : constate en pratique, l'image de
+       fond s'appliquait quand meme via la regle par cle plus bas, mais SANS
+       ces proprietes -- d'ou le fond repete/tuile au lieu d'une seule icone). */
+    div[class*="st-key-theme_card_"] button {{
+        height: 92px !important;
+        padding-top: 42px !important;
+        white-space: normal !important;
+        line-height: 1.25 !important;
+        font-size: 0.78rem !important;
+        font-weight: 600 !important;
+        background-repeat: no-repeat !important;
+        background-position: center 14px !important;
+        background-size: 26px 26px !important;
+        /* keep-all : jamais de coupure AU MILIEU d'un mot (vu en pratique :
+           "Epidemiologie" coupait en "Epidemiologi"/"e") -- un mot entier
+           retombe a la ligne suivante plutot que d'etre tronconne. */
+        word-break: keep-all !important;
+        overflow-wrap: normal !important;
+    }}
+    div[class*="st-key-theme_card_"] button * {{
+        word-break: keep-all !important;
+        overflow-wrap: normal !important;
+    }}
+
+    /* Reponse mise en valeur : liseré d'accent en haut du conteneur natif
+       qui l'entoure (repere via un marqueur invisible, voir :has()). */
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.answer-box-marker) {{
+        border-top: 3px solid {PRIMARY_COLOR};
         padding-top: 0.3rem;
-    }
+    }}
+
+    /* Mobile (<= 480px, teste a 390px) : les 5 cartes de theme passent sur
+       une seule colonne au lieu de rester ecrasees cote a cote. */
+    @media (max-width: 480px) {{
+        div[data-testid="stHorizontalBlock"]:has(.theme-card) {{
+            flex-direction: column !important;
+        }}
+        div[data-testid="stHorizontalBlock"]:has(.theme-card) > div {{
+            width: 100% !important;
+            min-width: 100% !important;
+        }}
+    }}
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-banner_path = ASSETS / "banner.png"
-if banner_path.exists():
-    st.image(str(banner_path), width="stretch")
-
-st.title("🚭 Chatbot sur le tabagisme en Tunisie")
-st.caption(
-    "Développement d'un ChatBot sur le tabagisme en Tunisie : législation, "
-    "sevrage tabagique, épidémiologie, effets sur la santé."
+# ============================================================
+# 5. EN-TETE (icone + titre UNE SEULE FOIS + sous-titre -- pas de banniere)
+# ============================================================
+st.markdown(
+    f"""
+    <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.2rem;">
+      <span style="font-size:2rem;">🩺</span>
+      <span style="font-size:1.8rem;font-weight:700;color:{PRIMARY_COLOR};">
+        Chatbot Tabagisme Tunisie
+      </span>
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
-
-st.info(
-    "⏳ Le pipeline applique plusieurs vérifications avant de répondre "
-    "(routage de sécurité, recherche hybride vecteur+graphe, notation des "
-    "preuves, vérification de fiabilité). Réponse généralement en quelques "
-    "secondes.",
-    icon="⏳",
+st.caption(
+    "Informations sourcées sur le tabagisme en Tunisie : législation, sevrage, "
+    "épidémiologie, santé."
 )
 
 # ============================================================
-# 3. THEMES, ICONES ET QUESTIONS D'EXEMPLE
+# 6. THEMES ET QUESTIONS D'EXEMPLE
 # ============================================================
 THEMES = {
     "legislation": {
         "label": "Législation",
-        "icon": "icon_legislation.png",
         "questions": [
             "Que dit la loi tunisienne sur la publicité pour le tabac ?",
             "Quelle loi tunisienne interdit de fumer dans les lieux publics ?",
@@ -196,7 +311,6 @@ THEMES = {
     },
     "sevrage": {
         "label": "Sevrage (TSN)",
-        "icon": "icon_sevrage.png",
         "questions": [
             "Quels sont les différents dosages disponibles pour le patch à la nicotine ?",
             "Quelles sont les différentes formes de traitement de substitution nicotinique ?",
@@ -206,7 +320,6 @@ THEMES = {
     },
     "dependance": {
         "label": "Dépendance tabagique",
-        "icon": "icon_dependance.png",
         "questions": [
             "Quels sont les symptômes du sevrage nicotinique ?",
             "Quelles sont les trois composantes de la dépendance au tabac ?",
@@ -215,7 +328,6 @@ THEMES = {
     },
     "epidemio": {
         "label": "Épidémiologie",
-        "icon": "icon_epidemio.png",
         "questions": [
             "Quelle est la prévalence du tabagisme chez les adultes en Tunisie ?",
             "Combien de personnes meurent du tabac chaque année en Tunisie ?",
@@ -225,7 +337,6 @@ THEMES = {
     },
     "sante": {
         "label": "Effets sur la santé",
-        "icon": "icon_sante.png",
         "questions": [
             "Quelles sont les maladies causées par le tabagisme ?",
             "Combien de substances chimiques contient la fumée de tabac ?",
@@ -244,12 +355,20 @@ st.subheader("1. Choisis un thème")
 cols = st.columns(len(THEMES))
 for col, (key, theme) in zip(cols, THEMES.items()):
     with col:
-        with st.container(border=True):
-            icon_path = ASSETS / theme["icon"]
-            if icon_path.exists():
-                st.image(str(icon_path), width="stretch")
-            st.markdown(f'<div class="theme-caption">{theme["label"]}</div>', unsafe_allow_html=True)
-            if st.button("Exemples", key=f"theme_{key}", width="stretch"):
+        with st.container(key=f"theme_card_{key}"):
+            st.markdown('<span class="theme-card"></span>', unsafe_allow_html=True)
+            icon_uri = _icon_data_uri(key)
+            st.markdown(
+                f"""
+                <style>
+                .st-key-theme_card_{key} button {{
+                    background-image: url("{icon_uri}");
+                }}
+                </style>
+                """,
+                unsafe_allow_html=True,
+            )
+            if st.button(theme["label"], key=f"theme_{key}", width="stretch"):
                 st.session_state.active_theme = key
 
 if st.session_state.active_theme:
@@ -263,23 +382,12 @@ if st.session_state.active_theme:
 st.divider()
 
 # ============================================================
-# 4. ZONE DE QUESTION + LANCEMENT
+# 7. ZONE DE QUESTION + LANCEMENT
 # ============================================================
 st.subheader("2. Pose ta question")
-# st.form() + key= (plutot que value=st.session_state... sans key) : pattern
-# canonique Streamlit pour lier un widget directement a une cle de
-# session_state (les boutons d'exemple ecrivent dans cette MEME cle) et
-# grouper texte+clic en un seul envoi atomique. Garde par principe de
-# prudence, meme si l'investigation ci-dessous a fini par montrer que la
-# vraie cause du bug rapporte etait ailleurs (voir plus bas, zone de
-# reponse) : la premiere hypothese ("le pipeline recoit l'ancienne
-# question") a ete testee rigoureusement, y compris en rejouant le code
-# D'AVANT ce correctif avec une methode de verification correcte (attendre
-# que la reponse affichee CHANGE reellement, pas juste qu'un texte soit
-# present) -- et le pipeline a TOUJOURS recu la bonne question, meme dans le
-# code d'origine. Le premier diagnostic ("course sur le text_area") etait
-# donc faux ; la vraie cause est documentee au-dessus de `response_area`
-# plus bas.
+# st.form() + key= : lie le widget directement a st.session_state.question_input
+# (les boutons d'exemple ecrivent dans cette meme cle) et regroupe texte+clic
+# en un seul envoi atomique.
 with st.form("question_form"):
     question = st.text_area(
         "Question",
@@ -288,28 +396,26 @@ with st.form("question_form"):
         placeholder="Pose ta question sur le tabagisme en Tunisie...",
         label_visibility="collapsed",
     )
-    lancer = st.form_submit_button("🔍 Poser la question", type="primary", width="stretch")
+    lancer = st.form_submit_button("Poser la question", type="primary", width="stretch")
 
 if "last_result" not in st.session_state:
     st.session_state.last_result = None
 
 # st.empty() : zone unique reecrite pour la reponse -- sans ca, pendant les
-# plusieurs secondes de calcul (routage+recherche+generation+verification),
-# la DERNIERE reponse affichee reste visible a l'ecran telle quelle (Streamlit
-# ne l'efface pas tant que le script n'a pas reatteint ce point). Un utilisateur
-# qui regarde l'ecran pendant que le spinner tourne peut alors croire, a tort,
-# qu'il voit deja la reponse a SA nouvelle question alors qu'il s'agit encore
-# de l'ancienne. On remplace donc explicitement cette zone par un message de
-# chargement DES LE DEBUT du calcul, avant meme d'appeler le pipeline.
+# plusieurs secondes de calcul, la DERNIERE reponse affichee reste visible a
+# l'ecran telle quelle (Streamlit ne l'efface pas tant que le script n'a pas
+# reatteint ce point), ce qui peut faire croire a tort qu'elle correspond
+# deja a la nouvelle question. On remplace donc explicitement cette zone par
+# un message de chargement DES LE DEBUT du calcul.
 response_area = st.empty()
 
 if lancer and question.strip():
-    response_area.info("⏳ Génération de la réponse en cours pour cette question -- la réponse précédente, affichée ci-dessus, ne correspond plus à ta question tant que ce message est là.")
+    response_area.info("🔎 Je cherche dans les sources officielles…")
 
     log_buffer = io.StringIO()
     start = time.time()
 
-    with st.spinner("Traitement en cours (routage → recherche → vérification → génération)..."):
+    with st.spinner("🔎 Je cherche dans les sources officielles…"):
         with contextlib.redirect_stdout(log_buffer):
             initial_state = {
                 "question": question.strip(),
@@ -325,6 +431,7 @@ if lancer and question.strip():
         "answer_text": final_state.get("final_answer", "(pas de reponse)"),
         "sources": final_state.get("sources", []),
         "log": log_buffer.getvalue(),
+        "saturated": final_state.get("final_answer") == chatbot.SATURATION_MESSAGE,
     }
 elif lancer:
     st.session_state.last_result = None
@@ -333,20 +440,26 @@ elif lancer:
 if st.session_state.last_result:
     r = st.session_state.last_result
     with response_area.container():
-        st.success(f"Réponse obtenue en {r['duree']:.0f} secondes")
+        if not r["saturated"]:
+            st.success(f"Réponse obtenue en {r['duree']:.0f} secondes")
 
         with st.container(border=True):
             st.markdown('<span class="answer-box-marker"></span>', unsafe_allow_html=True)
-            st.markdown("### 💬 Réponse")
+            st.markdown("### Réponse")
             st.write(_SOURCES_LINE_RE.sub("", r["answer_text"]))
 
-            render_source_cards(r["sources"])
+            if not r["saturated"]:
+                render_source_cards(r["sources"])
 
-        with st.expander("🔧 Voir le détail du pipeline (routage, recherche, notation, vérification)"):
-            st.code(r["log"] or "(aucun log -- réponse cadrée sans retrieval)", language=None)
+        # Detail technique du pipeline : cache sauf en mode demo explicite
+        # (case a cocher ou ?debug=1 dans l'URL) -- un vrai utilisateur n'a
+        # pas besoin de voir "routage"/"grading"/"groundedness".
+        if demo_mode:
+            with st.expander("Détail technique du pipeline (mode démo)"):
+                st.code(r["log"] or "(aucun log -- réponse cadrée sans retrieval)", language=None)
 
 st.divider()
 st.caption(
-    "⚠️ Cet assistant est un outil d'information et ne remplace pas un avis médical "
+    "Cet assistant est un outil d'information et ne remplace pas un avis médical "
     "personnalisé."
 )

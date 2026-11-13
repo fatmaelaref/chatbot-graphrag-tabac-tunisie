@@ -1,0 +1,11 @@
+[theme]
+# Style "app sante professionnelle" : une seule couleur d'accent (teal sante,
+# #0F766E -- contraste 5.47:1 sur blanc, largement au-dessus du seuil WCAG AA
+# de 4.5:1 pour du texte normal), fond blanc, police sobre. Boutons, liens et
+# anneaux de focus utilisent automatiquement primaryColor.
+base = "light"
+primaryColor = "#0F766E"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F3F4F6"
+textColor = "#1F2937"
+font = "sans serif"

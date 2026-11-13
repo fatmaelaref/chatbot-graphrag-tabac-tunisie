@@ -6,9 +6,11 @@ Reutilise exactement la meme configuration que build_knowledge_graph.py
 (meme schema, meme prompt, meme modele) mais ne traite que les
 fichiers listes ci-dessous, au lieu des 10 -- utile quand certaines
 entites (ex: PNRT, Projet FCTC 20-30) n'ont pas ete extraites lors
-du dernier run complet. Grace au MERGE, aucun risque de doublon :
-tout ce qui a deja ete extrait de ces fichiers sera juste retrouve
-et complete, pas duplique.
+du dernier run complet. Le writer de neo4j_graphrag fait un CREATE
+(pas un MERGE) sur le noeud Source : ce script nettoie donc l'ancien
+noeud Source (et ses chunks Article) de chaque fichier AVANT de le
+retraiter (voir _nettoyer_source_existante), pour pouvoir etre
+rejoue autant de fois que necessaire sans jamais dupliquer.
 """
 import sys
 import os

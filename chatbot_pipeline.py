@@ -161,6 +161,33 @@ GRADING_TRUNCATE_CHARS = 1500
 GENERATION_TRUNCATE_CHARS = 2000
 GROUNDEDNESS_TRUNCATE_CHARS = 2000
 
+# ============================================================
+# MODE STRICT (saturation Groq) -- desactive par defaut
+# ============================================================
+# False par defaut : AUCUN changement de comportement pour evaluate.py,
+# baseline.py, ablation_graphe.py ni les tests -- ils continuent de recevoir
+# les reponses de repli existantes (route='normal', grading conservateur a 3
+# candidats, etc.), necessaires pour que leurs metriques restent definies et
+# comparables dans le temps.
+# app.py (l'interface utilisateur reelle) met ce flag a True explicitement
+# apres avoir charge ce module : pour un vrai utilisateur, mieux vaut dire
+# clairement "service sature, reessaie plus tard" que de livrer une reponse
+# degradee (routage ou notation des preuves tombes en repli faute de quota
+# Groq) en laissant croire qu'elle est fiable.
+STRICT_LLM_FAILURE_MODE = False
+
+
+def _sanitize_llm_error(exc: Exception) -> str:
+    """Message affichable a un utilisateur final -- jamais le texte brut
+    d'une exception API (peut contenir un identifiant d'organisation/projet
+    Groq ou d'autres details internes). Ne distingue que le cas quota (429)
+    du reste, qui reste generique."""
+    text = str(exc)
+    if "429" in text or "rate_limit" in text.lower():
+        return "Quota Groq atteint (429)"
+    return "Erreur du service de generation"
+
+
 driver = GraphDatabase.driver(
     os.getenv("NEO4J_URI"),
     auth=(os.getenv("NEO4J_USERNAME"), os.getenv("NEO4J_PASSWORD"))
@@ -466,6 +493,9 @@ class ChatState(TypedDict, total=False):
     draft_answer: str
     final_answer: str
     sources: list
+    llm_unavailable: bool          # route_query/grade_evidence/generate_answer sont
+                                    # tombes en repli (quota Groq) -- utilise seulement
+                                    # si STRICT_LLM_FAILURE_MODE est actif (app.py)
 
 
 # ============================================================
@@ -525,6 +555,11 @@ def route_query(state: ChatState) -> ChatState:
         # on part sur "normal" mais on log l'incident pour audit.
         print("   ⚠️ Routage LLM indisponible -- fallback route='normal' (a auditer).")
         state = {**state, "route": "normal", "route_reason": "fallback: echec parsing JSON"}
+        if STRICT_LLM_FAILURE_MODE:
+            # Reste "sticky" jusqu'a finalize() : meme si un appel ulterieur
+            # reussit, le routage (filet de securite) a tourne en mode degrade
+            # sur CETTE question -- pas de garantie a offrir a l'utilisateur.
+            state["llm_unavailable"] = True
     else:
         state = {**state, "route": result["route"], "route_reason": result["reason"]}
     return _apply_safety_backstop(state)
@@ -919,7 +954,8 @@ def grade_evidence(state: ChatState) -> ChatState:
         # candidats en le signalant explicitement dans les logs.
         print("   ⚠️ Grading LLM indisponible -- fallback conservateur (3 candidats max).")
         graded = [{**c, "raison": "fallback (grading indisponible)", "score": 5} for c in all_candidates[:3]]
-        return {**state, "graded_evidence": graded}
+        extra = {"llm_unavailable": True} if STRICT_LLM_FAILURE_MODE else {}
+        return {**state, "graded_evidence": graded, **extra}
 
     verdicts_raw = result.get("verdicts", [])
     verdicts = {v["index"]: v for v in verdicts_raw if "index" in v}
@@ -1139,7 +1175,9 @@ def generate_answer(state: ChatState) -> ChatState:
                 "disponibles. Peux-tu reformuler ta question ?"
             )
     except Exception as e:
-        draft = f"Erreur lors de la generation de la reponse : {e}"
+        draft = _sanitize_llm_error(e)
+        if STRICT_LLM_FAILURE_MODE:
+            state = {**state, "llm_unavailable": True}
 
     sources = sorted({e["source"] for e in evidence})
     return {**state, "draft_answer": draft, "sources": sources}
@@ -1168,13 +1206,14 @@ y en a. Reponds UNIQUEMENT en JSON."""
 
 def _audit_once(evidence_text: str, draft: str) -> Optional[dict]:
     user_prompt = f"Preuves :\n{evidence_text}\n\nReponse a verifier :\n{draft}"
-    # Utilise GENERATION_MODEL (mistral), pas CONTROL_MODEL : constate en pratique que
-    # les petits modeles (qwen2.5:0.5b, llama3.2:3b) rejettent a tort des affirmations
-    # pourtant correctes et bien appuyees par les preuves -- peu fiables pour ce
-    # jugement precis. Comme la generation qui precede utilise deja mistral, ca ne
-    # rajoute AUCUN changement de modele supplementaire (mistral reste charge d'un
-    # appel a l'autre) -- juste un seul swap leger->lourd par question, au lieu de
-    # plusieurs allers-retours entre modeles differents.
+    # Utilise GENERATION_MODEL (openai/gpt-oss-120b, via Groq), pas CONTROL_MODEL
+    # (openai/gpt-oss-20b) : constate en pratique que le modele leger rejette a tort
+    # des affirmations pourtant correctes et bien appuyees par les preuves -- peu
+    # fiable pour ce jugement precis. Comme la generation qui precede utilise deja
+    # GENERATION_MODEL, ca ne rajoute AUCUN changement de modele supplementaire
+    # (GENERATION_MODEL reste charge d'un appel a l'autre) -- juste un seul swap
+    # leger->lourd par question, au lieu de plusieurs allers-retours entre modeles
+    # differents.
     return call_llm_json(GENERATION_MODEL, GROUNDEDNESS_SYSTEM, user_prompt, GROUNDEDNESS_SCHEMA)
 
 
@@ -1284,7 +1323,18 @@ def validate_groundedness(state: ChatState) -> ChatState:
 # ============================================================
 # 10. NOEUD [8] -- FINALISATION
 # ============================================================
+SATURATION_MESSAGE = "Service temporairement sature, reessaie dans quelques minutes."
+
+
 def finalize(state: ChatState) -> ChatState:
+    if STRICT_LLM_FAILURE_MODE and state.get("llm_unavailable"):
+        # Le routage et/ou le grading sont tombes en repli faute de quota Groq
+        # sur cette question -- on ne livre JAMAIS la reponse qui en resulte
+        # (potentiellement degradee silencieusement) a un vrai utilisateur.
+        # Pas de disclaimer medical ici : ce n'est pas un contenu medical,
+        # juste un statut systeme.
+        return {**state, "final_answer": SATURATION_MESSAGE, "sources": []}
+
     answer = state.get("final_answer", "")
     sources = state.get("sources", [])
     if sources:

@@ -105,6 +105,19 @@ Dans l'ordre, pour (re)construire le graphe et lancer le chatbot :
 4. **Chatbot en ligne de commande** : `python chatbot_pipeline.py`.
 5. **Interface web** : `streamlit run app.py` (réutilise
    directement la logique de `chatbot_pipeline.py`, rien à dupliquer).
+   Couleur d'accent et police configurées dans `.streamlit/config.toml`.
+   Icônes de thèmes : [Lucide](https://lucide.dev) (licence ISC), SVG
+   recolorées à l'accent, intégrées inline dans `app.py` -- aucune
+   dépendance externe au runtime.
+
+   **Mode démo** (expose le détail technique du pipeline -- routage,
+   recherche, notation des preuves -- utile pour une soutenance) : coché
+   via la case "Mode démo" dans la barre latérale, ou en ouvrant l'URL
+   avec `?debug=1` (ex. `http://localhost:8501/?debug=1`). Caché par
+   défaut : un utilisateur normal ne voit jamais ce jargon. Si Groq
+   répond 429 (quota atteint), même en mode démo l'app n'affiche jamais
+   l'erreur brute de l'API (qui peut contenir un identifiant
+   d'organisation) -- seulement "Quota Groq atteint (429)".
 
 Pour vérifier rapidement que tout est opérationnel (Ollama/Neo4j/Groq +
 pipeline sur 2 questions, ~30s) sans lancer les 81 questions du jeu de
@@ -200,7 +213,9 @@ chatbot_pipeline.py        Pipeline du chatbot (LangGraph)
 reprocess_files.py         Retraitement d'un sous-ensemble de fichiers
 kg_config.py                Schema et prompts d'extraction
 kg_pipeline_common.py      Briques partagees build_knowledge_graph.py / reprocess_files.py
-app.py                      Interface web (Streamlit)
+app.py                      Interface web (Streamlit) -- icônes Lucide inline, pas d'assets/
+sources_meta.json          Nom affiché/organisme/URL par fichier source (app.py + chatbot_pipeline.py)
+.streamlit/config.toml     Thème (couleur d'accent, police) de l'interface
 smoke_test.py               Vérification rapide des services + du pipeline
 scripts/                    Scripts ponctuels (sauvegarde, vidage, ajout manuel)
     backup_graph.py
@@ -211,7 +226,6 @@ poster/                     Poster (#BetterPoster) et ses figures
 docs/                       Journal de travail et version publique épurée
     JOURNAL_TRAVAIL.md (non versionné -- voir .gitignore)
     JOURNAL_PUBLIC.md
-assets/                      Icônes de l'interface
 documents/                   Sources .pptx d'origine
 textes/                      Corpus texte extrait (entrée du build du graphe)
 evaluation/                  Jeu de test, scripts et résultats d'évaluation
