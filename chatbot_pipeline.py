@@ -1047,6 +1047,12 @@ REGLES ABSOLUES :
 - Tu reponds UNIQUEMENT en francais.
 - Tu te bases STRICTEMENT sur les preuves fournies. Aucune loi, date, chiffre, nom ou
   dosage qui n'apparait pas dans les preuves ne doit apparaitre dans ta reponse.
+- A l'inverse, si une preuve contient un identifiant precis (numero ou intitule exact
+  d'une loi/d'un texte, date exacte, nombre d'articles, nom officiel d'une institution
+  ou d'un programme...), REPRENDS-LE TEL QUEL dans ta reponse -- ne remplace jamais un
+  identifiant precis present dans la preuve par une formulation generique. Cet
+  identifiant fait partie de l'information demandee, pas un detail secondaire a omettre
+  pour raccourcir la reponse.
 - NE MELANGE JAMAIS les chiffres de deux produits/entites differents. Si les preuves
   parlent a la fois du patch et de la gomme par exemple, un dosage donne pour la gomme
   (ex: 2mg, 4mg) ne doit JAMAIS etre attribue au patch, et inversement. Verifie a quel
