@@ -22,14 +22,17 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 from dotenv import load_dotenv
-from neo4j import GraphDatabase
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_DIR))
+from neo4j_connection import build_neo4j_driver
+
 load_dotenv(PROJECT_DIR / ".env")
 
-driver = GraphDatabase.driver(
+driver = build_neo4j_driver(
     os.getenv("NEO4J_URI"),
-    auth=(os.getenv("NEO4J_USERNAME"), os.getenv("NEO4J_PASSWORD")),
+    os.getenv("NEO4J_USERNAME"),
+    os.getenv("NEO4J_PASSWORD"),
 )
 driver.verify_connectivity()
 print("✅ Connecté à Neo4j")

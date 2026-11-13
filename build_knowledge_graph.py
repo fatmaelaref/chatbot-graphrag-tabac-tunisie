@@ -27,7 +27,7 @@ import csv
 import asyncio
 import glob
 from dotenv import load_dotenv
-from neo4j import GraphDatabase
+from neo4j_connection import build_neo4j_driver
 
 from kg_pipeline_common import (
     LLM_MODEL_NAME,
@@ -56,9 +56,10 @@ if missing_vars:
     sys.exit(1)
 
 try:
-    neo4j_driver = GraphDatabase.driver(
+    neo4j_driver = build_neo4j_driver(
         os.getenv("NEO4J_URI"),
-        auth=(os.getenv("NEO4J_USERNAME"), os.getenv("NEO4J_PASSWORD"))
+        os.getenv("NEO4J_USERNAME"),
+        os.getenv("NEO4J_PASSWORD"),
     )
     neo4j_driver.verify_connectivity()
     print("✅ Connecté à Neo4j")

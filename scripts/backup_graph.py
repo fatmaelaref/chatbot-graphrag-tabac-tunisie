@@ -15,9 +15,10 @@ from datetime import date
 from pathlib import Path
 
 from dotenv import load_dotenv
-from neo4j import GraphDatabase
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_DIR))
+from neo4j_connection import build_neo4j_driver
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 load_dotenv(PROJECT_DIR / ".env")
@@ -46,9 +47,10 @@ def dump_graph_to_json(driver, out_dir: Path) -> tuple[int, int]:
 
 
 if __name__ == "__main__":
-    driver = GraphDatabase.driver(
+    driver = build_neo4j_driver(
         os.getenv("NEO4J_URI"),
-        auth=(os.getenv("NEO4J_USERNAME"), os.getenv("NEO4J_PASSWORD")),
+        os.getenv("NEO4J_USERNAME"),
+        os.getenv("NEO4J_PASSWORD"),
     )
 
     today = date.today().strftime("%Y%m%d")

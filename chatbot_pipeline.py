@@ -78,7 +78,7 @@ from typing import TypedDict, Optional
 
 from openai import OpenAI  # utilise aussi pour Groq -- meme librairie, juste une autre adresse
 from dotenv import load_dotenv
-from neo4j import GraphDatabase
+from neo4j_connection import build_neo4j_driver
 from neo4j_graphrag.embeddings import OllamaEmbeddings
 from neo4j_graphrag.retrievers import VectorCypherRetriever
 from neo4j_graphrag.types import RetrieverResultItem
@@ -188,9 +188,10 @@ def _sanitize_llm_error(exc: Exception) -> str:
     return "Erreur du service de generation"
 
 
-driver = GraphDatabase.driver(
+driver = build_neo4j_driver(
     os.getenv("NEO4J_URI"),
-    auth=(os.getenv("NEO4J_USERNAME"), os.getenv("NEO4J_PASSWORD"))
+    os.getenv("NEO4J_USERNAME"),
+    os.getenv("NEO4J_PASSWORD"),
 )
 embedder = OllamaEmbeddings(model="nomic-embed-text")  # embeddings restent en local -- rapides,
                                                          # aucun souci de vitesse constate dessus

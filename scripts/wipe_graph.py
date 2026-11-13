@@ -16,20 +16,22 @@ from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
-from neo4j import GraphDatabase
 
 # Python ajoute automatiquement le dossier du script a sys.path -- backup_graph
 # (meme dossier scripts/) est donc importable directement, sans manipulation.
 from backup_graph import dump_graph_to_json
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_DIR))
+from neo4j_connection import build_neo4j_driver
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 load_dotenv(PROJECT_DIR / ".env")
 
-driver = GraphDatabase.driver(
+driver = build_neo4j_driver(
     os.getenv("NEO4J_URI"),
-    auth=(os.getenv("NEO4J_USERNAME"), os.getenv("NEO4J_PASSWORD")),
+    os.getenv("NEO4J_USERNAME"),
+    os.getenv("NEO4J_PASSWORD"),
 )
 
 stamp = datetime.now().strftime("%Y%m%d_%H%M%S")

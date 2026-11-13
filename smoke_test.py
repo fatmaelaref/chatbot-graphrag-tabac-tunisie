@@ -65,10 +65,11 @@ def check_ollama():
 
 
 def check_neo4j():
-    from neo4j import GraphDatabase
-    driver = GraphDatabase.driver(
+    from neo4j_connection import build_neo4j_driver
+    driver = build_neo4j_driver(
         os.getenv("NEO4J_URI"),
-        auth=(os.getenv("NEO4J_USERNAME"), os.getenv("NEO4J_PASSWORD")),
+        os.getenv("NEO4J_USERNAME"),
+        os.getenv("NEO4J_PASSWORD"),
     )
     try:
         with driver.session() as session:
