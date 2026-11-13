@@ -27,7 +27,6 @@ Mode demo (expose le detail technique du pipeline, pour une soutenance) :
 
 import base64
 import ssl
-import time
 import io
 import re
 import contextlib
@@ -413,7 +412,6 @@ if lancer and question.strip():
     response_area.info("🔎 Je cherche dans les sources officielles…")
 
     log_buffer = io.StringIO()
-    start = time.time()
 
     with st.spinner("🔎 Je cherche dans les sources officielles…"):
         with contextlib.redirect_stdout(log_buffer):
@@ -425,9 +423,7 @@ if lancer and question.strip():
             }
             final_state = compiled_app.invoke(initial_state)
 
-    duree = time.time() - start
     st.session_state.last_result = {
-        "duree": duree,
         "answer_text": final_state.get("final_answer", "(pas de reponse)"),
         "sources": final_state.get("sources", []),
         "log": log_buffer.getvalue(),
@@ -440,9 +436,6 @@ elif lancer:
 if st.session_state.last_result:
     r = st.session_state.last_result
     with response_area.container():
-        if not r["saturated"]:
-            st.success(f"Réponse obtenue en {r['duree']:.0f} secondes")
-
         with st.container(border=True):
             st.markdown('<span class="answer-box-marker"></span>', unsafe_allow_html=True)
             st.markdown("### Réponse")
