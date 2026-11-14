@@ -233,3 +233,12 @@ evaluation/                  Jeu de test, scripts et résultats d'évaluation
 tests/                       Tests unitaires (logique pure, sans service externe)
 archive/                     Logs/sauvegardes de sessions passées (non versionné)
 ```
+
+## Licence
+
+Le code de ce dépôt est publié sous licence [MIT](LICENSE). Cette licence
+ne couvre pas les sources publiques citées dans `textes/` (OMS, NHS, CDC,
+Santé publique France, etc.), qui restent soumises à leurs propres
+conditions d'usage, ni les présentations du laboratoire et leur
+extraction texte, qui ne sont de toute façon pas incluses dans ce dépôt
+(voir `.gitignore`).
