@@ -20,26 +20,19 @@ Projet réalisé dans le cadre d'un stage de recherche (laboratoire LR01ES04).
 
 ## Architecture
 
+```mermaid
+flowchart TD
+    A["📄 documents/*.pptx<br/>sources brutes"] -->|extract_documents.py| B["📝 textes/*.txt<br/>corpus texte"]
+    B -->|build_knowledge_graph.py| C["🧠 Extraction contrôlée<br/>SimpleKGPipeline (neo4j_graphrag)<br/>qwen2.5:7b, local"]
+    C --> D[("🕸️ Graphe de connaissances<br/>Neo4j Aura")]
+    D -->|chatbot_pipeline.py| E["🔀 Pipeline LangGraph<br/>routage sécurité → réécriture →<br/>recherche hybride (vecteur + Cypher) →<br/>grading LLM → génération →<br/>vérification groundedness"]
+    E --> F["💬 app.py<br/>interface Streamlit"]
 ```
-documents/*.pptx  --(extract_documents.py)-->  textes/*.txt
-                                                  |
-                                   (build_knowledge_graph.py : SimpleKGPipeline
-                                    de neo4j_graphrag, extraction via
-                                    qwen2.5:7b local, schema/prompt dans
-                                    kg_config.py, briques partagees avec
-                                    reprocess_files.py dans
-                                    kg_pipeline_common.py)
-                                                  v
-                                   Graphe de connaissances (Neo4j Aura)
-                                                  |
-                      (chatbot_pipeline.py : pipeline LangGraph --
-                       routage securite -> reecriture -> recherche hybride
-                       vecteur+Cypher -> grading LLM -> generation ->
-                       verification groundedness. Generation via Groq
-                       gpt-oss-120b/20b, embeddings nomic-embed-text local)
-                                                  v
-                                   app.py (interface web Streamlit)
-```
+
+- **Extraction** : schéma/prompt d'extraction dans `kg_config.py`, briques
+  partagées avec `reprocess_files.py` via `kg_pipeline_common.py`.
+- **Génération** : Groq `gpt-oss-120b` (génération) / `gpt-oss-20b`
+  (contrôle) ; embeddings `nomic-embed-text` (local, Ollama).
 
 `evaluation/` contient le jeu de test (`gold_eval_set.json`, 81 questions
 vérifiées contre `textes/`), le script d'évaluation (`evaluate.py`), une
