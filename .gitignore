@@ -1,6 +1,9 @@
 # Secrets -- ne jamais committer
 .env
 
+# Reglages d'editeur personnels -- pas destines a la publication
+.vscode/
+
 # Python
 __pycache__/
 *.pyc
