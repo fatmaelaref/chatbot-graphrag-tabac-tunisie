@@ -221,8 +221,8 @@ scripts/                    Scripts ponctuels (sauvegarde, vidage, ajout manuel)
     backup_graph.py
     wipe_graph.py
     add_fctc_programme.py
-poster/                     Poster (#BetterPoster) et ses figures
-    poster_tabac.tex / poster_tabac.pdf
+poster/                     Poster (#BetterPoster)
+    poster.pdf
 docs/                       Journal de travail et version publique épurée
     JOURNAL_TRAVAIL.md (non versionné -- voir .gitignore)
     JOURNAL_PUBLIC.md
